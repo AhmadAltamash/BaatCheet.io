@@ -1,5 +1,6 @@
 import Background from '@/assets/login2.png'
 import Victory from '@/assets/victory.svg'
+import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 const Auth = () => {
@@ -27,8 +28,16 @@ const Auth = () => {
               <TabsTrigger value='signup' className='data-[state=active]:bg-transparent text-black text-opacity-90 border-b-2 rounded-none w-full data-[state=active]:text-black data-[state=active]:font-semibold data-[state=active]:border-b-purple-500 p-3 transition-all duration-300'>Signup</TabsTrigger>
             </TabsList>
 
-            <TabsContent className='' value='login' ></TabsContent>
-            <TabsContent value='signup' className=''></TabsContent>
+            <TabsContent className='' value='login' >
+              <Input
+                placeholder='Username'
+              />
+            </TabsContent>
+            <TabsContent value='signup' className=''>
+              <Input
+                placeholder='Username'
+              />
+            </TabsContent>
 
           </Tabs>
         </div>
