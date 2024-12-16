@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { apiClient } from '@/lib/api-client'
-import { SIGNUP_ROUTE } from '@/utils/constants'
+import { LOGIN_ROUTE, SIGNUP_ROUTE } from '@/utils/constants'
 
 const Auth = () => {
 
@@ -30,13 +30,28 @@ const Auth = () => {
     return true;
   }
 
-  const handleLogin = async () => {
+  const validateLogin = () => {
+    if(!email.length){
+      toast.error("Email is Required");
+      return false
+    }
+    if(!password.length){
+      toast.error("Password is Required");
+      return false
+    }
+    return true;
+  }
 
+  const handleLogin = async () => {
+    if(validateLogin()){
+      const response = await apiClient.post(LOGIN_ROUTE, { email, password }, { withCredentials: true })
+      console.log({ response })
+    }
   }
 
   const handleSubmit = async () => {
     if(validateSignup()){
-      const response = await apiClient.post(SIGNUP_ROUTE, { email, password });
+      const response = await apiClient.post(SIGNUP_ROUTE, { email, password }, {withCredentials: true});
       console.log({ response })
     }
   }
@@ -62,7 +77,7 @@ const Auth = () => {
               <TabsTrigger value='signup' className='data-[state=active]:bg-transparent text-black text-opacity-90 border-b-2 rounded-none w-full data-[state=active]:text-black data-[state=active]:font-semibold data-[state=active]:border-b-purple-500 p-3 transition-all duration-300'>Signup</TabsTrigger>
             </TabsList>
 
-            <TabsContent className='flex flex-col gap-5 mt-4' value='login' >
+            <TabsContent value='login' className='flex flex-col gap-5 mt-4'>
               <Input
                 placeholder='Email'
                 type='email'
