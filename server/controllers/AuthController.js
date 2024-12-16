@@ -22,7 +22,7 @@ export const signup = async (req, res, next) => {
             secure: true,
             sameSite: "None"
         })
-        return response.status(201).json({ user: {
+        return res.status(201).json({ user: {
             email: user.email,
             id: user.id,
             // firstName: user.firstname,
