@@ -10,7 +10,7 @@ const App = () => {
       <Routes>
         <Route path='*' element={<Navigate to='/signup-login'/>} />
         <Route path='/chat' element={<Chat/>} />
-        <Route path='/signup-login' element={<Auth/>} />
+        <Route path='/auth' element={<Auth/>} />
         <Route path='/profile' element={<Profile/>} />
       </Routes>
     </BrowserRouter>
