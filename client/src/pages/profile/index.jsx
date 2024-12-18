@@ -1,5 +1,5 @@
 import { useAppStore } from "@/store"
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { IoArrowBack } from 'react-icons/io5'
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
@@ -7,18 +7,61 @@ import { colors, getColor } from "@/lib/utils";
 import { FaPlus, FaTrash } from 'react-icons/fa'
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { apiClient } from "@/lib/api-client";
+import { UPDATE_PROFILE_ROUTE } from "@/utils/constants";
 
 const Profile = () => {
 
   const navigate = useNavigate();
   const { userInfo, setUserInfo } = useAppStore();
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [firstname, setFirstName] = useState("");
+  const [lastname, setLastName] = useState("");
   const [image, setImage] = useState(null);
   const [hovered, setHovered] = useState(false);
   const [selectedColor, setSelectedColor] = useState(0);
 
-  const saveChanges = async () => {}
+
+  useEffect(() => {
+    if(userInfo.profileSetup) {
+      setFirstName(userInfo.firstName);
+      setLastName(userInfo.lastName);
+      setSelectedColor(userInfo.color);
+    }
+  }, [userInfo])
+
+
+  const validateProfile = () => {
+    if(!firstname) {
+      toast.error("First Name is required");
+      return false;
+    }
+    if(!lastname) {
+      toast.error("Last Name is required");
+      return false;
+    }
+    return true;
+  }
+
+  const saveChanges = async () => {
+    if (validateProfile()) {
+        try {
+            const response = await apiClient.post(UPDATE_PROFILE_ROUTE, {
+                firstname, lastname, color: selectedColor
+            }, { withCredentials: true });
+
+            if (response.status === 200 && response.data) {
+                setUserInfo({ ...response.data });
+                toast.success("Profile updated successfully");
+                navigate("/chat");
+            }
+        } catch (error) {
+            console.log(error);
+            toast.error("Error updating profile");
+        }
+    }
+};
+
 
   return (
     <div className="bg-[#1b1c24] h-[100vh] flex items-center justify-center gap-10">
@@ -36,7 +79,7 @@ const Profile = () => {
                 <AvatarImage src={image} alt="profile" className="object-cover w-full h-full bg-black"/>
               ) : (
                 <div className={`uppercase h-32 w-32 md:w-48 md:h-48 text-5xl border-[.5px] flex items-center justify-center rounded-full ${getColor(selectedColor)}`} >
-                  {firstName ? firstName.split("").shift() : userInfo.email.split("").shift()}
+                  {firstname ? firstname.split("").shift() : userInfo.email.split("").shift()}
                 </div>
               )}
             </Avatar>
@@ -55,13 +98,13 @@ const Profile = () => {
              </div>
 
              <div className="w-full">
-                <Input placeholder="First Name" type="text" value={firstName} className="rounded-lg p-6 bg-[#2c2e3b] border-none"
+                <Input placeholder="First Name" type="text" value={firstname} className="rounded-lg p-6 bg-[#2c2e3b] border-none"
                 onChange={(e) => setFirstName(e.target.value)}
                 />
              </div>
 
              <div className="w-full">
-                <Input placeholder="Last Name" type="text" value={lastName} className="rounded-lg p-6 bg-[#2c2e3b] border-none"
+                <Input placeholder="Last Name" type="text" value={lastname} className="rounded-lg p-6 bg-[#2c2e3b] border-none"
                 onChange={(e) => setLastName(e.target.value)}
                 />
              </div>
@@ -72,7 +115,7 @@ const Profile = () => {
           </div>
         </div>
         <div className="w-full">
-          <Button className="h-16 w-full bg-purple-700 hover:bg-purple-900 transition-all duration-200 ease-in-out" onCLick={saveChanges}>Save Changes</Button>
+          <Button className="h-16 w-full bg-purple-700 hover:bg-purple-900 transition-all duration-200 ease-in-out" onClick={saveChanges}>Save Changes</Button>
         </div>
       </div>
     </div>

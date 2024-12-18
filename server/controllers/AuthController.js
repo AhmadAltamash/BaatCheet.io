@@ -19,10 +19,11 @@ export const signup = async (req, res, next) => {
         const user = await User.create({email, password});
 
         res.cookie("jwt", createToken(email, user.id), {
+            httpOnly: true,
+            secure: true, 
+            sameSite: "Lax", 
             maxAge,
-            secure: true,
-            sameSite: "None"
-        })
+        });          
         return res.status(201).json({ user: {
             email: user.email,
             id: user.id,
@@ -53,10 +54,11 @@ export const login = async (req, res, next) => {
         }
 
         res.cookie("jwt", createToken(email, user.id), {
+            httpOnly: true,
+            secure: true, 
+            sameSite: "Lax", 
             maxAge,
-            secure: true,
-            sameSite: "None"
-        })
+        });
         return res.status(200).json({ user: {
             email: user.email,
             id: user.id,
@@ -95,21 +97,28 @@ export const getUserInfo = async (req, res, next) => {
 
 export const updateProfile = async (req, res, next) => {
     try {
-        const userData = await User.findById(req.userId);
-        if(!userData) {
-            return res.status(404).json({message: "User not found."});
+        const { userId } = req;
+        const { firstname, lastname, color } = req.body;
+
+        if (!firstname || !lastname) {
+            return res.status(400).json({ message: "First name, last name, and color are required." });
         }
+
+        const userData = await User.findByIdAndUpdate(userId, {
+            firstname, lastname, color, profileSetup: true
+        }, { new: true, runValidators: true });
+
         return res.status(200).json({
             email: userData.email,
             id: userData.id,
-            firstName: userData.firstname,
-            lastName: userData.lastname,
+            firstname: userData.firstname,
+            lastname: userData.lastname,
             image: userData.image,
             profileSetup: userData.profileSetup,
             color: userData.color
-        })
+        });
     } catch (error) {
-        console.log({error});
-        return res.status(500).json({message: "Error signing up user", error: error.message})
+        console.log({ error });
+        return res.status(500).json({ message: "Error updating profile", error: error.message });
     }
-}
+};
