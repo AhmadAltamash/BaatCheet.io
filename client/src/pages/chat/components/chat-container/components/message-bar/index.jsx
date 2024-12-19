@@ -1,4 +1,5 @@
-import React, { useRef, useState } from 'react'
+import EmojiPicker from 'emoji-picker-react'
+import React, { useEffect, useRef, useState } from 'react'
 import {GrAttachment} from 'react-icons/gr'
 import { IoSend } from 'react-icons/io5'
 import { RiEmojiStickerLine } from 'react-icons/ri'
@@ -6,6 +7,23 @@ const MessageBar = () => {
   
   const emojiRef = useRef("")
   const [message, setMessage] = useState("")
+  const [emojiPickerOpen, setEmojiPickerOpen] = useState(false)
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if(emojiRef.current && !emojiRef.current.contains(event.target)){
+        setEmojiPickerOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [emojiRef])
+
+  const handleAddEmoji = (emoji) => {
+    setMessage((msg) => msg + emoji.emoji)
+  }
 
   const handleSendMessage = async () => {
 
@@ -21,10 +39,17 @@ const MessageBar = () => {
         </button>
         {/* <input type='file'/> */}
         <div className="relative">
-          <button className='text-neutral-500 focus:border-none focus:outline-none focus:text-white duration-300 transition-all'>
+          <button className='text-neutral-500 focus:border-none focus:outline-none focus:text-white duration-300 transition-all' onClick={() => setEmojiPickerOpen(true)}>
             <RiEmojiStickerLine className='text-2xl'/>
           </button>
-          <div className="absolute bottom-16 right-0"></div>
+          <div className="absolute bottom-16 right-0" ref={emojiRef}>
+            <EmojiPicker
+              theme='dark'
+              open={emojiPickerOpen}
+              onEmojiClick={handleAddEmoji}
+              autoFocusSearch={false}
+            />
+          </div>
         </div>
       </div>
       <button className='bg-[#8417ff] focus:border-none focus:outline-none focus:text-white duration-300 transition-all rounded-md flex items-center justify-center p-[1.20rem] hover:bg-[#741bda] focus:bg-[#741bda]' onClick={handleSendMessage}>
