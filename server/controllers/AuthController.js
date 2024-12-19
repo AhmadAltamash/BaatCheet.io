@@ -122,3 +122,30 @@ export const updateProfile = async (req, res, next) => {
         return res.status(500).json({ message: "Error updating profile", error: error.message });
     }
 };
+export const addProfileImage = async (req, res, next) => {
+    try {
+        const { userId } = req;
+        const { firstname, lastname, color } = req.body;
+
+        if (!firstname || !lastname) {
+            return res.status(400).json({ message: "First name, last name, and color are required." });
+        }
+
+        const userData = await User.findByIdAndUpdate(userId, {
+            firstname, lastname, color, profileSetup: true
+        }, { new: true, runValidators: true });
+
+        return res.status(200).json({
+            email: userData.email,
+            id: userData.id,
+            firstname: userData.firstname,
+            lastname: userData.lastname,
+            image: userData.image,
+            profileSetup: userData.profileSetup,
+            color: userData.color
+        });
+    } catch (error) {
+        console.log({ error });
+        return res.status(500).json({ message: "Error updating profile", error: error.message });
+    }
+};
