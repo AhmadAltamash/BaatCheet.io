@@ -9,8 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { apiClient } from "@/lib/api-client";
-import { ADD_PROFILE_IMAGE_ROUTE, UPDATE_PROFILE_ROUTE } from "@/utils/constants";
-import { FoldHorizontal } from "lucide-react";
+import { ADD_PROFILE_IMAGE_ROUTE, HOST, REMOVE_PROFILE_IMAGE_ROUTE, UPDATE_PROFILE_ROUTE } from "@/utils/constants";
 
 const Profile = () => {
 
@@ -24,12 +23,18 @@ const Profile = () => {
   const fileInputRef = useRef(null)
 
   useEffect(() => {
-    if(userInfo.profileSetup) {
-      setFirstName(userInfo.firstName);
-      setLastName(userInfo.lastName);
-      setSelectedColor(userInfo.color);
+    if (userInfo.profileSetup) {
+      setFirstName(userInfo.firstName || "");
+      setLastName(userInfo.lastName || "");
+      setSelectedColor(userInfo.color || "");
     }
-  }, [userInfo])
+  
+    if (userInfo.image) {
+      const imageUrl = `${HOST}${userInfo.image}`;
+      setImage(imageUrl);
+      console.log("Image URL:", imageUrl);
+    }
+  }, [userInfo]);
 
 
   const validateProfile = () => {
@@ -77,25 +82,29 @@ const Profile = () => {
 
   const handleImageChange = async (event) => {
     const file = event.target.files[0];
-    console.log(file)
+    console.log({file})
     if(file) {
       const formData = new FormData();
-      FormData.append("profile-image", file);
-      const response = await apiClient.post(ADD_PROFILE_IMAGE_ROUTE, FormData, {withCredentials:true})
+      formData.append("profile-image", file);
+      const response = await apiClient.post(ADD_PROFILE_IMAGE_ROUTE, formData, {withCredentials:true})
         if(response.status === 200 && response.data.image){
         setUserInfo({...userInfo, image: response.data.image })
         toast.success("Profile image updated successfully");
       }
-      const reader = new FileReader()
-      reader.onload = () => {
-        setImage(reader.result);
-      };
-      reader.readAsDataURL(file);
     }
   }
 
   const handleDeleteImage = async () => {
-
+    try {
+      const response = await apiClient.delete(REMOVE_PROFILE_IMAGE_ROUTE, { withCredentials: true })
+      if (response.status === 200) {
+        setUserInfo({...userInfo, image: null})
+        toast.success("Image Removed Successfully")
+        setImage(null);
+      }
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   return (
@@ -105,27 +114,56 @@ const Profile = () => {
           <IoArrowBack className="text-4xl lg:text-6xl text-white/90 cursor-pointer"/>
         </div>
         <div className="grid grid-cols-2">
-          <div className="md:h-[80%] w-32 md:w-48 h-[55%] relative flex items-center justify-center"
-            onMouseEnter={() => {setHovered(true)}}
-            onMouseLeave={() => {setHovered(false)}}
-          >
-            <Avatar className="w-32 h-32 md:w-48 md:h-48 rounded-full overflow-hidden">
-              {image ? (
-                <AvatarImage src={image} alt="profile" className="object-cover w-full h-full bg-black"/>
-              ) : (
-                <div className={`uppercase h-32 w-32 md:w-48 md:h-48 text-5xl border-[.5px] flex items-center justify-center rounded-full ${getColor(selectedColor)}`} >
-                  {firstname ? firstname.split("").shift() : userInfo.email.split("").shift()}
-                </div>
-              )}
-            </Avatar>
-
-             {hovered && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/50 ring-fuchsia-50 rounded-full" onClick={image ? handleDeleteImage : handleFileInputClick}>
-                { image ? <FaTrash className="text-white text-2xl cursor-pointer"/> : <FaPlus className="text-white text-2xl cursor-pointer" />}
+        <div
+          className="md:h-[80%] w-32 md:w-48 h-[55%] relative flex items-center justify-center"
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+        >
+          <Avatar className="w-32 h-32 md:w-48 md:h-48 rounded-full overflow-hidden">
+            {image ? (
+              <AvatarImage
+                src={image}
+                alt="profile"
+                className="object-cover w-full h-full bg-black"
+                onError={(e) => {
+                  e.target.onerror = null; // Prevent infinite loop
+                  e.target.src = "/placeholder-image.png"; // Fallback image
+                }}
+              />
+            ) : (
+              <div
+                className={`uppercase h-32 w-32 md:w-48 md:h-48 text-5xl border-[.5px] flex items-center justify-center rounded-full ${getColor(
+                  selectedColor
+                )}`}
+              >
+                {firstname
+                  ? firstname[0].toUpperCase()
+                  : userInfo.email[0].toUpperCase()}
               </div>
-             )}
-             <input type="file" ref={fileInputRef} className="hidden" onChange={handleImageChange} name="profile-image" accept=".png, .jpeg, .jpg, .svg, .webp"/> 
-          </div>
+            )}
+          </Avatar>
+
+          {hovered && (
+            <div
+              className="absolute inset-0 flex items-center justify-center bg-black/50 ring-fuchsia-50 rounded-full"
+              onClick={image ? handleDeleteImage : handleFileInputClick}
+            >
+              {image ? (
+                <FaTrash className="text-white text-2xl cursor-pointer" />
+              ) : (
+                <FaPlus className="text-white text-2xl cursor-pointer" />
+              )}
+            </div>
+          )}
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            onChange={handleImageChange}
+            name="profile-image"
+            accept=".png, .jpeg, .jpg, .svg, .webp"
+          />
+        </div>
 
           <div className="flex min-w-32 md:min-w-64 flex-col gap-5 text-white items-center justify-center">
              <div className="w-full">

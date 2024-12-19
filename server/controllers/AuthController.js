@@ -1,6 +1,7 @@
 import pkg from "jsonwebtoken";
 import User from "../models/UserModel.js";
 import { compare } from "bcrypt";
+import { renameSync, unlinkSync } from 'fs'
 
 const { sign } = pkg
 const maxAge = 3 * 24 * 60 * 60 * 1000;
@@ -124,28 +125,47 @@ export const updateProfile = async (req, res, next) => {
 };
 export const addProfileImage = async (req, res, next) => {
     try {
-        const { userId } = req;
-        const { firstname, lastname, color } = req.body;
-
-        if (!firstname || !lastname) {
-            return res.status(400).json({ message: "First name, last name, and color are required." });
+        if(!req.file) {
+            return res.status(400).json({ message: "File is required" });
         }
 
-        const userData = await User.findByIdAndUpdate(userId, {
-            firstname, lastname, color, profileSetup: true
-        }, { new: true, runValidators: true });
+        const date = Date.now();
+        let fileName = "uploads/profiles/" + date + req.file.originalname;
+        renameSync(req.file.path, fileName)
+
+        const updatedUser = await User.findByIdAndUpdate(req.userId, {image: fileName}, { new: true, runValidators: true })
 
         return res.status(200).json({
-            email: userData.email,
-            id: userData.id,
-            firstname: userData.firstname,
-            lastname: userData.lastname,
-            image: userData.image,
-            profileSetup: userData.profileSetup,
-            color: userData.color
+            image: updatedUser.image,
         });
     } catch (error) {
         console.log({ error });
         return res.status(500).json({ message: "Error updating profile", error: error.message });
+    }
+};
+
+
+export const removeProfileImage = async (req, res, next) => {
+    try {
+        const { userId } = req;
+        
+        const user = await User.findById(userId);
+
+        if(!user) {
+            return res.status(404).send("User not Found");
+        }
+
+        if(user.image) {
+            unlinkSync(user.image)
+        }
+
+        user.image = null;
+
+        await user.save();
+
+        return res.status(200).send("Profile image removed successfully")
+    } catch (error) {
+        console.log({ error });
+        return res.status(500).json({ message: "Error removing profile", error: error.message });
     }
 };
