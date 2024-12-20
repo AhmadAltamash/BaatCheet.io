@@ -93,7 +93,7 @@ const Auth = () => {
               className='h-[100px]'
             />
           </div>
-          <p className='capitalize font-medium text-center'>Fill in the details to get Started the best Chat application</p>
+          <p className='capitalize font-medium text-center'>Fill in the details to get Started with the best Chat application</p>
           <div className='flex items-center justify-center w-full'>
           <Tabs className='w-3/4' defaultValue='login'>
 
