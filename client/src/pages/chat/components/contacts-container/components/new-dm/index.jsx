@@ -15,10 +15,15 @@ import {
   
 import { useState } from "react"
 import { FaPlus } from "react-icons/fa"
+import { Input } from "@/components/ui/input"
   
 const NewDM = () => {
 
     const [openNewContactModel, setOpenNewContactModel] = useState(false)
+
+    const searchContacts = async (event) => {
+
+    }
 
   return (
     <>
@@ -33,14 +38,19 @@ const NewDM = () => {
             </Tooltip>
         </TooltipProvider>
         <Dialog open={openNewContactModel} onOpenChange={setOpenNewContactModel}>
-            <DialogContent>
+            <DialogContent className="bg-[#181920] border-none text-white w-[400px] h-[400px] flex flex-col">
                 <DialogHeader>
-                <DialogTitle>Are you absolutely sure?</DialogTitle>
-                <DialogDescription>
-                    This action cannot be undone. This will permanently delete your account
-                    and remove your data from our servers.
-                </DialogDescription>
+                {/* <DialogTitle>Are you absolutely sure?</DialogTitle> */}
+                <DialogTitle>Please Select a Contact</DialogTitle>
+                <DialogDescription></DialogDescription>
                 </DialogHeader>
+                <div>
+                    <Input
+                        placeholder="Search Contacts"
+                        className="rounded-lg p-6 bg-[#2c2e3b] border-none outline-none focus:outline-purple-500 focus:border-purple-500"
+                        onChange={(e) => searchContacts(e.target.value)}
+                    />
+                </div>
             </DialogContent>
         </Dialog>
     </>
