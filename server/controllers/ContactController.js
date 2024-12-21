@@ -13,7 +13,7 @@ export const searchContacts = async (req, res, next) => {
             "\\$&" 
         );
 
-        const regex = new RedExp(sanitizedSearchTerm, "i");
+        const regex = new RegExp(sanitizedSearchTerm, "i");
 
         const contacts = await User.find({
             $and: [{ _id: { $ne: req.userId } }, {

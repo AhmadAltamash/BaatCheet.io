@@ -15,12 +15,17 @@ import {
 import { useState } from "react"
 import { FaPlus } from "react-icons/fa"
 import { Input } from "@/components/ui/input"
-import { animationDefaultOptions } from "@/lib/utils"
+import { animationDefaultOptions, getColor } from "@/lib/utils"
 import Lottie from "react-lottie"
 import { apiClient } from "@/lib/api-client"
-import { SEARCH_CONTACTS_ROUTES } from "@/utils/constants"
+import { HOST, SEARCH_CONTACTS_ROUTES } from "@/utils/constants"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Avatar, AvatarImage } from "@/components/ui/avatar"
+import { useAppStore } from "@/store"
   
 const NewDM = () => {
+
+    const { setSelectedChatType, setSelectedChatData } = useAppStore();
 
     const [openNewContactModel, setOpenNewContactModel] = useState(false)
     const [searchedContacts, setSearchedContacts] = useState([])
@@ -38,6 +43,13 @@ const NewDM = () => {
         } catch (error) {
             console.log({ error })
         }
+    }
+
+    const selectNewContact = (contact) => {
+        setOpenNewContactModel(false);
+        setSelectedChatType("contact");
+        setSelectedChatData(contact);
+        setSearchedContacts([])
     }
 
   return (
@@ -65,6 +77,47 @@ const NewDM = () => {
                         onChange={(e) => searchContacts(e.target.value)}
                     />
                 </div>
+                <ScrollArea>
+                    <div className="flex flex-col gap-5">
+                        { searchedContacts.map((contact) => (
+                            <div key={contact._id} className="flex gap-3 items-center cursor-pointer hover:bg-[#2c2e3b] p-2 rounded-md" onClick={() => selectNewContact(contact)}>
+                                <div className='w-12 h-12 relative'>
+                                    <Avatar className="w-12 h-12 rounded-full overflow-hidden">
+                                        {contact?.image ? (
+                                            <AvatarImage
+                                                src={`${HOST}${contact.image}`}
+                                                alt="profile"
+                                                className="object-cover w-full h-full bg-black"
+                                                onError={(e) => {
+                                                    e.target.onerror = null;
+                                                    e.target.src = "/placeholder-image.png";
+                                                }}
+                                            />
+                                        ) : (
+                                            <div
+                                                className={`uppercase h-12 w-12 text-lg border-[.5px] flex items-center justify-center rounded-full ${getColor(
+                                                    contact?.color
+                                                )}`}
+                                            >
+                                                {contact?.firstname
+                                                    ? contact.firstname[0].toUpperCase()
+                                                    : contact?.email?.[0]?.toUpperCase() || "N"}
+                                            </div>
+                                        )}
+                                    </Avatar>
+                                </div>
+                                <div className="flex flex-col">
+                                   <span>
+                                   {contact.firstname && contact.lastname ? 
+                                    `${contact.firstname} ${contact.lastname}` :
+                                    ""} 
+                                   </span>
+                                   <span className="text-xs">{contact.email}</span>
+                                </div> 
+                            </div>
+                        )) }
+                    </div>
+                </ScrollArea>
                 {
                     searchedContacts.length <= 0 &&  <div className="flex-1 bg-transparent md:flex flex-col justify-center items-center duration-1000 transition-all">
                     <Lottie
