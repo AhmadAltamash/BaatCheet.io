@@ -1,4 +1,61 @@
+// import { Server as SocketIOServer } from "socket.io";
+// import Message from "./models/MessagesModel.js";
+
+// const setupSocket = (server) => {
+//     const io = new SocketIOServer(server, {
+//         cors: {
+//             origin: process.env.ORIGIN,
+//             methods: ["GET", "POST"],
+//             credentials: true
+//         }
+//     })
+
+//     const userSocketMap = new Map();
+
+//     const disconnect = (socket) => {
+//         console.log(`Client disconnected: ${socket.id}`);
+//         for(const [userId, socketId] of userSocketMap.entries()) {
+//             if(socketId === socket.id) {
+//                 userSocketMap.delete(userId);
+//                 break;
+//             }
+//         }
+//     };
+
+//     const sendMessage = async (message) => {
+//         const senderSocketId = userSocketMap.get(message.sender);
+//         const recipientSocketId = userSocketMap.get(message.recipient);
+
+//         const createdMessage = await Message.create(message);
+
+//         const messageData = await Message.findById(createdMessage._id).populate("sender", "id email firstname lastname image color").populate("recipient", "id email firstname lastname image color");
+
+//         if(recipientSocketId) {
+//             io.to(recipientSocketId).emit("recieveMessage", messageData);
+//         }
+//         if(senderSocketId) {
+//             io.to(senderSocketId).emit("recieveMessage", messageData);
+//         }
+//     }
+
+//     io.on("connection", (socket) => {
+//         const userId = socket.handshake.query.userId;
+
+//         if(userId) {
+//             userSocketMap.set(userId, socket.id);
+//             console.log(`User Connnected: ${userId} with socket ID: ${socket.id}`);
+//         } else {
+//             console.log('Unknown user connected');
+//         }
+
+//         socket.on("sendMessage", sendMessage);
+//         socket.on("disconnect", () => disconnect(socket));
+//     })
+// }
+
+// export default setupSocket;
 import { Server as SocketIOServer } from "socket.io";
+import Message from "./models/MessagesModel.js";
 
 const setupSocket = (server) => {
     const io = new SocketIOServer(server, {
@@ -7,32 +64,64 @@ const setupSocket = (server) => {
             methods: ["GET", "POST"],
             credentials: true
         }
-    })
+    });
 
     const userSocketMap = new Map();
 
     const disconnect = (socket) => {
         console.log(`Client disconnected: ${socket.id}`);
-        for(const [userId, socketId] of userSocketMap.entries()) {
-            if(socketId === socket.id) {
+        for (const [userId, socketId] of userSocketMap.entries()) {
+            if (socketId === socket.id) {
                 userSocketMap.delete(userId);
                 break;
             }
         }
-    }
+    };
+
+    const sendMessage = async (message) => {
+        const senderSocketId = userSocketMap.get(message.sender);
+        const recipientSocketId = userSocketMap.get(message.recipient);
+
+        // Ensure the message content is correctly encrypted (before saving to DB)
+        if (message.content && typeof message.content === "object") {
+            const encryptedContent = JSON.stringify({
+                iv: message.content.iv,
+                ciphertext: message.content.ciphertext,
+            });
+            message.content = encryptedContent;  // Ensure it's stored as string in DB
+        }
+
+        try {
+            const createdMessage = await Message.create(message);
+            const messageData = await Message.findById(createdMessage._id)
+                .populate("sender", "id email firstname lastname image color")
+                .populate("recipient", "id email firstname lastname image color");
+
+            // Emit the message to both sender and recipient
+            if (recipientSocketId) {
+                io.to(recipientSocketId).emit("recieveMessage", messageData);
+            }
+            if (senderSocketId) {
+                io.to(senderSocketId).emit("recieveMessage", messageData);
+            }
+        } catch (error) {
+            console.error("Error sending message:", error);
+        }
+    };
 
     io.on("connection", (socket) => {
         const userId = socket.handshake.query.userId;
 
-        if(userId) {
+        if (userId) {
             userSocketMap.set(userId, socket.id);
-            console.log(`User Connnected: ${userId} with socket ID: ${socket.id}`);
+            console.log(`User Connected: ${userId} with socket ID: ${socket.id}`);
         } else {
-            console.log('Unknown user connected');
+            console.log("Unknown user connected");
         }
 
+        socket.on("sendMessage", sendMessage);
         socket.on("disconnect", () => disconnect(socket));
-    })
-}
+    });
+};
 
 export default setupSocket;
