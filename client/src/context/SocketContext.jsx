@@ -14,30 +14,32 @@ export const SocketProvider = ({ children }) => {
     const socket = useRef();
     const { userInfo } = useAppStore();
 
-    const decryptMessage = (encryptedMessage) => {
+    const decryptMessage = (encryptedText) => {
         try {
-            console.log("Encrypted Message:", encryptedMessage);  // Log the message before decryption
-
-            const { iv, ciphertext } = JSON.parse(encryptedMessage);  
-            const key = import.meta.env.SECRET_KEY; 
-           
-            if (key) {
-            console.error("SECRET_KEY is not defined.");
+            if(!encryptedText){
+                console.log(encryptedText);
             }
-        
-            // Decrypt using AES
-            const decryptedBytes = CryptoJS.AES.decrypt(
-                { ciphertext: CryptoJS.enc.Base64.parse(ciphertext), iv: CryptoJS.enc.Base64.parse(iv) },
-                key
-            );
-            const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
-        
-            return decryptedText;
+          const key = CryptoJS.enc.Utf8.parse(import.meta.env.VITE_SECRET_KEY); // Parse the secret key
+          const data = JSON.parse(encryptedText); // Parse the input JSON
+      
+          const iv = CryptoJS.enc.Hex.parse(data.iv); // Parse IV from Hex
+          const decrypted = CryptoJS.AES.decrypt(
+            { ciphertext: CryptoJS.enc.Base64.parse(data.ciphertext) }, // Parse ciphertext from Base64
+            key,
+            {
+              iv: iv,
+              mode: CryptoJS.mode.CBC,
+              padding: CryptoJS.pad.Pkcs7,
+            }
+          );
+      
+          return CryptoJS.enc.Utf8.stringify(decrypted); // Convert decrypted bytes back to string
         } catch (error) {
-            console.error("Error decrypting message:", error);
-            return null;  // Return null if decryption fails
+          console.error("Decryption error:", error); // Log errors if decryption fails
+          return null;
         }
-    };
+      };
+      
 
     useEffect(() => {
         if (userInfo) {

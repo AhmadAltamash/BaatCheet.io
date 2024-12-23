@@ -87,7 +87,7 @@ const MessageBar = () => {
   const socket = useSocket()
   const [message, setMessage] = useState("")
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false)
-  const SECRET_KEY = import.meta.env.SECRET_KEY;
+  
 
   // Handle closing the emoji picker when clicking outside
   useEffect(() => {
@@ -104,26 +104,37 @@ const MessageBar = () => {
 
   // Encrypt message content
   const encryptMessage = (text) => {
-    if (!text) {
-      console.error("Message is empty, cannot encrypt.");
-      return null;  // Prevent encryption if the message is empty
-    } else {
-      console.log("message recieved")
+    try {
+      if (!text) {
+        console.error("Message is empty, cannot encrypt.");
+        return null; // Return null for empty messages
+      }
+  
+      if (!import.meta.env.VITE_SECRET_KEY) {
+        console.error("SECRET_KEY is undefined.");
+        return null; // Ensure SECRET_KEY is present
+      }
+  
+      const key = CryptoJS.enc.Utf8.parse(import.meta.env.VITE_SECRET_KEY); // Parse the secret key properly
+      const iv = CryptoJS.lib.WordArray.random(16); // Generate a random IV
+  
+      const encrypted = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(text), key, {
+        iv: iv,
+        mode: CryptoJS.mode.CBC,
+        padding: CryptoJS.pad.Pkcs7,
+      });
+      console.log(encrypted)
+      // Return IV and ciphertext as a JSON string
+      return JSON.stringify({
+        iv: CryptoJS.enc.Hex.stringify(iv), // Encode IV as hex
+        ciphertext: encrypted.ciphertext.toString(CryptoJS.enc.Base64), // Encode ciphertext as Base64
+      });
+    } catch (error) {
+      console.error("Encryption error:", error); // Catch any unexpected errors
+      return null;
     }
-  
-    const iv = CryptoJS.lib.WordArray.random(16);  // Generates a random initialization vector
-    const encrypted = CryptoJS.AES.encrypt(text, CryptoJS.enc.Utf8.parse(SECRET_KEY), {
-      iv: iv,
-      mode: CryptoJS.mode.CBC,
-      padding: CryptoJS.pad.Pkcs7,
-    });
-  
-    // Return the encrypted message as a JSON object containing iv and ciphertext
-    return JSON.stringify({
-      iv: iv.toString(CryptoJS.enc.Hex),
-      ciphertext: encrypted.toString(),
-    });
   };
+  
   
 
   // Add emoji to the message input

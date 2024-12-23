@@ -64,6 +64,7 @@ function encrypt(text) {
         mode: CryptoJS.mode.CBC,
         padding: CryptoJS.pad.Pkcs7,
     });
+    console.log(iv, encrypted)
     return JSON.stringify({
         iv: iv.toString(CryptoJS.enc.Hex),
         ciphertext: encrypted.toString(),
