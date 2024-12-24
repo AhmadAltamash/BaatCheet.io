@@ -56,6 +56,38 @@
 // export default setupSocket;
 import { Server as SocketIOServer } from "socket.io";
 import Message from "./models/MessagesModel.js";
+import CryptoJS from "crypto-js"; 
+
+
+const encrypt = (text) => {
+    const iv = CryptoJS.lib.WordArray.random(16);
+    const encrypted = CryptoJS.AES.encrypt(text, CryptoJS.enc.Utf8.parse(process.env.SECRET_KEY), {
+        iv: iv,
+        mode: CryptoJS.mode.CBC,
+        padding: CryptoJS.pad.Pkcs7,
+    });
+    return JSON.stringify({
+        iv: iv.toString(CryptoJS.enc.Hex),
+        ciphertext: encrypted.toString(),
+    });
+};
+
+
+const decrypt = (encryptedText) => {
+    try {
+        const data = JSON.parse(encryptedText);
+        const iv = CryptoJS.enc.Hex.parse(data.iv);
+        const decrypted = CryptoJS.AES.decrypt(data.ciphertext, CryptoJS.enc.Utf8.parse(process.env.SECRET_KEY), {
+            iv: iv,
+            mode: CryptoJS.mode.CBC,
+            padding: CryptoJS.pad.Pkcs7,
+        });
+        return decrypted.toString(CryptoJS.enc.Utf8);
+    } catch (error) {
+        console.error("Decryption error:", error);
+        return null; 
+    }
+};
 
 const setupSocket = (server) => {
     const io = new SocketIOServer(server, {
@@ -81,28 +113,33 @@ const setupSocket = (server) => {
     const sendMessage = async (message) => {
         const senderSocketId = userSocketMap.get(message.sender);
         const recipientSocketId = userSocketMap.get(message.recipient);
-
-        // Ensure the message content is correctly encrypted (before saving to DB)
-        if (message.content && typeof message.content === "object") {
-            const encryptedContent = JSON.stringify({
-                iv: message.content.iv,
-                ciphertext: message.content.ciphertext,
-            });
-            message.content = encryptedContent;  // Ensure it's stored as string in DB
+    
+        
+        if (message.messageType === "text" && message.content) {
+            message.content = encrypt(message.content);
         }
-
+    
         try {
+            
             const createdMessage = await Message.create(message);
             const messageData = await Message.findById(createdMessage._id)
                 .populate("sender", "id email firstname lastname image color")
                 .populate("recipient", "id email firstname lastname image color");
-
-            // Emit the message to both sender and recipient
+    
+            
+            const sanitizedMessage = {
+                ...messageData.toObject(),
+                content: decrypt(messageData.content),
+            };
+    
+            console.log("Emitting Message:", sanitizedMessage);
+    
+            
             if (recipientSocketId) {
-                io.to(recipientSocketId).emit("recieveMessage", messageData);
+                io.to(recipientSocketId).emit("recieveMessage", sanitizedMessage);
             }
             if (senderSocketId) {
-                io.to(senderSocketId).emit("recieveMessage", messageData);
+                io.to(senderSocketId).emit("recieveMessage", sanitizedMessage);
             }
         } catch (error) {
             console.error("Error sending message:", error);
