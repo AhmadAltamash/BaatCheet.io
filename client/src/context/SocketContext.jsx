@@ -40,20 +40,15 @@ export const SocketProvider = ({ children }) => {
             console.log({message})
             if (selectedChatType !== undefined && 
                 (selectedChatData._id === message.sender._id || selectedChatData._id === message.recipient._id)) {
-                    
-                const decryptedContent = decryptMessage(message.content);  
-                console.log(decryptedContent); 
-        
-                addMessage({ ...message, content: decryptedContent });  
+                
+                addMessage(message);  
+
             } else {
                 console.log("Message does not match selected chat");
             }
         };
 
-        socket.current.on("recieveMessage", (payload) => {
-            console.log("payload is here",payload);
-            handleRecieveMessage
-        });
+        socket.current.on("recieveMessage", handleRecieveMessage);
 
         return () => {
             socket.current.disconnect();
@@ -67,8 +62,6 @@ export const SocketProvider = ({ children }) => {
         </SocketContext.Provider>
     );
 };
-
-
 
 // useEffect(() => {
 //     if (userInfo) {
@@ -86,15 +79,20 @@ export const SocketProvider = ({ children }) => {
 //             console.log({message})
 //             if (selectedChatType !== undefined && 
 //                 (selectedChatData._id === message.sender._id || selectedChatData._id === message.recipient._id)) {
-                
-//                 addMessage(message);  
-
+                    
+//                 const decryptedContent = decryptMessage(message.content);  
+//                 console.log(decryptedContent); 
+        
+//                 addMessage({ ...message, content: decryptedContent });  
 //             } else {
 //                 console.log("Message does not match selected chat");
 //             }
 //         };
 
-//         socket.current.on("recieveMessage", handleRecieveMessage);
+//         socket.current.on("recieveMessage", (payload) => {
+//             console.log("payload is here",payload);
+//             handleRecieveMessage(payload)
+//         });
 
 //         return () => {
 //             socket.current.disconnect();
