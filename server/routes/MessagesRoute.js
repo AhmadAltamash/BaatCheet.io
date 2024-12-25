@@ -4,6 +4,6 @@ import { getMessages } from "../controllers/MessagesController.js";
 
 const messagesRoute = Router();
 
-messagesRoute.post("/get-messagese", verifyToken, getMessages)
+messagesRoute.post("/get-messages", verifyToken, getMessages)
 
 export default messagesRoute;
