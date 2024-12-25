@@ -40,7 +40,7 @@ export const getContactsForDMList = async (req, res, next) => {
 
         const contacts = await Message.aggregate([
             {
-                $match: {$or: [{sender: userId }, { recipient:userId }]}
+                $match: {$or: [{sender: userId }, { recipient: userId }]}
             },
             {
                 $sort:{timestamp: -1},
@@ -49,7 +49,7 @@ export const getContactsForDMList = async (req, res, next) => {
                 $group: {
                     _id:{
                         $cond:{
-                            if:{$eq:["sender", userId]},
+                            if:{$eq:["$sender", userId]},
                             then: "$recipient",
                             else: "$sender"
                         }
@@ -71,12 +71,12 @@ export const getContactsForDMList = async (req, res, next) => {
             {
                 $project: {
                     _id: 1,
-                    lastMessageTime:1,
-                    email: "$contact.email",
-                    firstName: "$contact.firstName",
-                    lastName: "$contact.lastName",
-                    image: "$contact.image",
-                    color: "$contact.color",
+                    lastMessageTime: 1,
+                    email: "$contactInfo.email",
+                    firstname: "$contactInfo.firstname",
+                    lastname: "$contactInfo.lastname",
+                    image: "$contactInfo.image",
+                    color: "$contactInfo.color",
                 }
             },
             {
