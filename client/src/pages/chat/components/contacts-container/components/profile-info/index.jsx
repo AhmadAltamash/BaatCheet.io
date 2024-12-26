@@ -1,3 +1,4 @@
+import Loader from '@/components/Loader';
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { apiClient } from '@/lib/api-client';
@@ -64,7 +65,7 @@ const ProfileInfo = () => {
                 <div>
                     {!loading && userInfo?.firstName && userInfo?.lastName
                         ? `${userInfo.firstName} ${userInfo.lastName}`
-                        : "Loading..."}
+                        : "Loading...Please Refresh"}
                 </div>
             </div>
             <div className='flex gap-5'>

@@ -1,5 +1,7 @@
 import { useSocket } from '@/context/SocketContext'
+import { apiClient } from '@/lib/api-client'
 import { useAppStore } from '@/store'
+import { UPLOAD_FILE_ROUTE } from '@/utils/constants'
 import EmojiPicker from 'emoji-picker-react'
 import React, { useEffect, useRef, useState } from 'react'
 import {GrAttachment} from 'react-icons/gr'
@@ -9,7 +11,7 @@ const MessageBar = () => {
   
   const emojiRef = useRef("");
   const fileInputRef = useRef();
-  const { selectedChatType, selectedChatData, userInfo } = useAppStore();
+  const { selectedChatType, selectedChatData, userInfo, setIsUploading, setFileUploadProgress } = useAppStore();
   const socket = useSocket();
   const [message, setMessage] = useState("")
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false)
@@ -49,11 +51,36 @@ const MessageBar = () => {
     }
   }
 
-  const handleAttachmentChange = async () => {
+  const handleAttachmentChange = async (e) => {
     try {
-      
+      const file = e.target.files[0];
+      if(file) {
+        const formData = new FormData();
+        formData.append("file", file);
+        setIsUploading(true);
+        const response = await apiClient.post(UPLOAD_FILE_ROUTE, formData, {withCredentials: true,
+          onUploadProgress: (data) => {
+            setFileUploadProgress(Math.round((100 * data.loaded) / data.total))
+          },
+        });
+
+        if(response.status === 200 && response.data) {
+          setIsUploading(false);
+          if(selectedChatType === "contact"){
+            socket.emit("sendMessage", {
+              sender: userInfo.id,
+              content: undefined,
+              recipient: selectedChatData._id,
+              messageType: "file",
+              fileUrl: response.data.filePath,
+            })
+          }
+        }
+      }
+      console.log(file)
     } catch (error) {
-      console.log(error)
+      setIsUploading(false)
+      console.log({error})
     }
   }
 

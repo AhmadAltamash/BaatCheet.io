@@ -84,6 +84,7 @@ import { Auth, Chat, Profile } from './pages';
 import { useAppStore } from './store';
 import { apiClient } from './lib/api-client';
 import { GET_USER_INFO } from './utils/constants';
+import Loader from './components/Loader';
 
 const PrivateRoute = ({ children }) => {
   const { userInfo } = useAppStore();
@@ -132,7 +133,7 @@ const App = () => {
   }, [userInfo, setUserInfo]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loader/>;
   }
 
   return (
