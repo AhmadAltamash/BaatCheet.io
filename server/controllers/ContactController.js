@@ -90,3 +90,18 @@ export const getContactsForDMList = async (req, res, next) => {
         return res.status(500).json({ message: "Could Not Log out", error: error.message });
     }
 };
+
+export const getAllContacts = async (req, res, next) => {
+    try {
+        const users = await User.find({ _id:{$ne: req.userId}}, "firstname lastname _id");
+
+        const contacts = users.map((user) => ({
+            label: user.firstname ? `${user.firstname} ${user.lastname}` : user.email,
+        }))
+
+        return res.status(200).json({ contacts })
+    } catch (error) {
+        console.log({ error });
+        return res.status(500).json({ message: "Could Not fetch contacts", error: error.message });
+    }
+};
