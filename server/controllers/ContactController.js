@@ -93,10 +93,11 @@ export const getContactsForDMList = async (req, res, next) => {
 
 export const getAllContacts = async (req, res, next) => {
     try {
-        const users = await User.find({ _id:{$ne: req.userId}}, "firstname lastname _id");
+        const users = await User.find({ _id:{$ne: req.userId}}, "email firstname lastname _id");
 
         const contacts = users.map((user) => ({
-            label: user.firstname ? `${user.firstname} ${user.lastname}` : user.email,
+            label: user.firstname ? `${user.firstname} ${user.lastname}` : `${user.email}`,
+            value: user._id,
         }))
 
         return res.status(200).json({ contacts })
