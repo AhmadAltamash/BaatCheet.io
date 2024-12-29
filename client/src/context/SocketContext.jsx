@@ -36,7 +36,7 @@ export const SocketProvider = ({ children }) => {
         });
 
         const handleRecieveMessage = (message) => {
-            const { selectedChatData, selectedChatType, addMessage } = useAppStore.getState();
+            const { selectedChatData, selectedChatType, addMessage, addContactsInDMContacts } = useAppStore.getState();
             console.log({message})
             if (selectedChatType !== undefined && 
                 (selectedChatData._id === message.sender._id || selectedChatData._id === message.recipient._id)) {
@@ -46,14 +46,16 @@ export const SocketProvider = ({ children }) => {
             } else {
                 console.log("Message does not match selected chat");
             }
+            addContactsInDMContacts(message)
         };
 
         const handleRecieveChannelMessage = async (message) => {
-            const { selectedChatData, selectedChatType, addMessage } = useAppStore.getState();
+            const { selectedChatData, selectedChatType, addMessage, addChannelInChannelList } = useAppStore.getState();
 
             if(selectedChatType !== undefined && selectedChatData._id === message.channelId ) {
                 addMessage(message);
             }
+            addChannelInChannelList(message)
         }
 
         socket.current.on("recieveMessage", handleRecieveMessage);
