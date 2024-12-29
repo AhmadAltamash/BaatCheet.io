@@ -1,4 +1,6 @@
 import User from '../models/UserModel.js'
+import Channel from '../models/ChannelModel.js';
+import mongoose from 'mongoose';
 
 export const createChannel = async (req, res, next) => {
     try {
@@ -28,6 +30,22 @@ export const createChannel = async (req, res, next) => {
 
     } catch (error) {
         console.log({ error });
-        return res.status(500).json({ message: "", error: error.message });
+        return res.status(500).json({ error: error.message });
+    }
+};
+
+export const getUserChannels = async (req, res, next) => {
+    try {
+       
+       const userId = new mongoose.Types.ObjectId(req.userId);
+       const channels = await Channel.find({
+        $or: [{ admin: userId }, { members: userId }]
+       }).sort({ updatedAt: -1 })
+
+       return res.status(200).json({ channels })
+
+    } catch (error) {
+        console.log({ error });
+        return res.status(500).json({ error: error.message });
     }
 };
