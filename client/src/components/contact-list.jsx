@@ -61,7 +61,3 @@ const ContactList = ({contacts, isChannel = false}) => {
 }
 
 export default ContactList
-
-{/* <div>
-                    {selectedChatType === "contact" && contact.firstname ? `${contact.firstname} ${contact.lastname}` : `${contact.email}`}
-                </div> */}

@@ -8,6 +8,7 @@ import { IoMdArrowRoundDown } from 'react-icons/io'
 import { IoCloseSharp } from 'react-icons/io5';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getColor } from '@/lib/utils';
+import CryptoJS from 'crypto-js';
 
 const MessageContainer = () => {
 
@@ -19,34 +20,75 @@ const MessageContainer = () => {
   const [showImage, setShowImage] = useState(false);
   const [imageUrl, setImageUrl] = useState(null)
 
+  const decryptMessage = (encryptedMessage) => {
+    try {
+        const { iv, ciphertext } = JSON.parse(encryptedMessage);
+
+        const key = CryptoJS.enc.Utf8.parse(import.meta.env.VITE_SECRET_KEY);
+
+        const decryptedBytes = CryptoJS.AES.decrypt(
+            { ciphertext: CryptoJS.enc.Base64.parse(ciphertext) },
+            key,
+            {
+                iv: CryptoJS.enc.Hex.parse(iv), 
+                mode: CryptoJS.mode.CBC,      
+                padding: CryptoJS.pad.Pkcs7, 
+            }
+        );
+
+        return decryptedBytes.toString(CryptoJS.enc.Utf8);
+    } catch (error) {
+        console.error("Decryption error:", error);
+        return null; 
+    }
+};
+
+
   useEffect(() => {
 
     const getMessages = async () => {
       try {
-        const response = await apiClient.post(GET_ALL_MESSAGES_ROUTE, {id: selectedChatData._id}, {withCredentials: true});
-
-        if(response.data.messages) {
-          setSelectedChatMessages(response.data.messages)
-        }
+          const response = await apiClient.post(
+              GET_ALL_MESSAGES_ROUTE,
+              { id: selectedChatData._id },
+              { withCredentials: true }
+          );
+  
+          if (response.data.messages) {
+              const decryptedMessages = response.data.messages.map((msg) => ({
+                  ...msg,
+                  content: msg.messageType === 'text'
+                      ? decryptMessage(msg.content) 
+                      : msg.content,              
+              }));
+              setSelectedChatMessages(decryptedMessages);
+          }
       } catch (error) {
-        console.log(error)
+          console.log(error);
       }
-    }
-
-    const getChannelMessages = async () => {
+  };
+  
+  const getChannelMessages = async () => {
       try {
-        const response = await apiClient.get(
-          `${GET_CHANNEL_MESSAGES_ROUTES}/${selectedChatData._id}`, 
-          {withCredentials: true});
-
-        if(response.data.messages) {
-          setSelectedChatMessages(response.data.messages)
-        }
+          const response = await apiClient.get(
+              `${GET_CHANNEL_MESSAGES_ROUTES}/${selectedChatData._id}`,
+              { withCredentials: true }
+          );
+  
+          if (response.data.messages) {
+              const decryptedMessages = response.data.messages.map((msg) => ({
+                  ...msg,
+                  content: msg.messageType === 'text'
+                      ? decryptMessage(msg.content) 
+                      : msg.content,              
+              }));
+              setSelectedChatMessages(decryptedMessages);
+          }
       } catch (error) {
-        console.log({error})
+          console.log({ error });
       }
-    }
-
+  };
+  
     if(selectedChatData._id) {
       if(selectedChatType === "contact") getMessages();
       else if(selectedChatType === "channel") getChannelMessages();
