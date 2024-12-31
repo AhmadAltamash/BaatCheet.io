@@ -174,7 +174,12 @@ export const removeProfileImage = async (req, res, next) => {
 
 export const logout = async (req, res, next) => {
     try {
-        res.cookie("jwt", "", { maxAge: 1 })
+        res.cookie("jwt", "invalid-token", { 
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: 'None',
+            maxAge: 1 
+        });
         return res.status(200).send("Log out Successfull")
     } catch (error) {
         console.log({ error });
