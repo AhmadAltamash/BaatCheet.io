@@ -20,11 +20,12 @@ export const signup = async (req, res, next) => {
         const user = await User.create({email, password});
 
         res.cookie("jwt", createToken(email, user.id), {
-            httpOnly: true,
-            secure: true, 
-            sameSite: "Lax", 
-            maxAge,
-        });          
+            httpOnly: true,                  
+            secure: process.env.NODE_ENV === "production", 
+            sameSite: 'None',                 
+            maxAge: maxAge                 
+        });
+                  
         return res.status(201).json({ user: {
             email: user.email,
             id: user.id,
@@ -55,11 +56,12 @@ export const login = async (req, res, next) => {
         }
 
         res.cookie("jwt", createToken(email, user.id), {
-            httpOnly: true,
-            secure: true, 
-            sameSite: "Lax", 
-            maxAge,
+            httpOnly: true,                   // Prevent access via JavaScript
+            secure: process.env.NODE_ENV === "production", // Use Secure flag only in production
+            sameSite: 'None',                 // Allow cross-origin cookies
+            maxAge: maxAge                    // Cookie expiration
         });
+        
         return res.status(200).json({ user: {
             email: user.email,
             id: user.id,
@@ -172,7 +174,7 @@ export const removeProfileImage = async (req, res, next) => {
 
 export const logout = async (req, res, next) => {
     try {
-        res.cookie("jwt", "", { maxAge: 1, secure: true, sameSite: "None" })
+        res.cookie("jwt", "", { maxAge: 1 })
         return res.status(200).send("Log out Successfull")
     } catch (error) {
         console.log({ error });

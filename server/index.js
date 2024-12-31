@@ -17,10 +17,11 @@ const port = process.env.PORT || 3001;
 const databaseURL = process.env.DATABASE_URL || 'mongodb://localhost:27017/';
 
 app.use(cors({
-    origin: [process.env.ORIGIN],
-    credentials: true,
+    origin: ["http://localhost:5173"], // Allow multiple origins if needed
+    credentials: true, // Enable sending cookies
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
-}))
+}));
+
 
 app.use("/uploads/profiles", express.static("uploads/profiles"));
 app.use("/uploads/files", express.static("uploads/files"));
