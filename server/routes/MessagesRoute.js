@@ -21,7 +21,7 @@ const messagesRoute = Router();
 // Routes
 messagesRoute.post("/get-messages", verifyToken, getMessages);
 messagesRoute.post("/upload-file", verifyToken, upload.single("file"), uploadFile);
-messagesRoute.delete("/delete-file", verifyToken, deleteFile); // Added delete file route
-messagesRoute.delete("/delete-message", verifyToken, deleteMessage); // New delete message route
+messagesRoute.delete("/delete-file/:id", verifyToken, deleteFile); // Added delete file route
+messagesRoute.delete("/delete-message/:id", verifyToken, deleteMessage); // New delete message route
 
 export default messagesRoute;

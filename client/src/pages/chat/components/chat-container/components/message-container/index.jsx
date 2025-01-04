@@ -9,6 +9,7 @@ import { IoCloseSharp } from 'react-icons/io5';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getColor } from '@/lib/utils';
 import CryptoJS from 'crypto-js';
+import axios from 'axios';
 
 const MessageContainer = () => {
 
@@ -32,7 +33,7 @@ const MessageContainer = () => {
           </li>
           {selectedMessage?.messageType === "file" && (
             <li
-              className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
+              className="px-4 py-2 hover:bg-purple-800/40 cursor-pointer"
               onClick={handleDeleteFile}
             >
               Delete File
@@ -73,6 +74,29 @@ const MessageContainer = () => {
       y: e.pageY,
     });
   };
+
+  const fetchMessages = async () => {
+    try {
+      const response = await apiClient.post(
+        GET_ALL_MESSAGES_ROUTE,
+        { id: selectedChatData._id },
+        { withCredentials: true }
+      );
+
+      if (response.data.messages) {
+          const decryptedMessages = response.data.messages.map((msg) => ({
+              ...msg,
+              content: msg.messageType === 'text'
+                  ? decryptMessage(msg.content) 
+                  : msg.content,              
+          }));
+          setSelectedChatMessages(decryptedMessages);
+      }
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    }
+  };
+  
 
   const scrollRef = useRef();
   const { selectedChatData, selectedChatType, userInfo, selectedChatMessages, setSelectedChatMessages, setFileDownloadProgress,
