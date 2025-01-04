@@ -4,6 +4,12 @@ import { Router } from "express";
 import { getUserInfo, login, signup, updateProfile, addProfileImage, removeProfileImage, logout } from '../controllers/AuthController.js';
 import { verifyToken } from "../middleware/AuthMiddleware.js";
 import multer from 'multer';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+// Get __dirname in ES module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Create uploads/profiles folder if it doesn't exist
 const uploadDir = path.join(__dirname, 'uploads', 'profiles');
