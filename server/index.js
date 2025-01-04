@@ -44,6 +44,23 @@ setupSocket(server);
 
 mongoose.connect(databaseURL).then(() => console.log(`MongoDB Connected on ${databaseURL}`)).catch((error)=> console.log(error))
 
+app.get("/proxy-file", async (req, res) => {
+    const fileUrl = req.query.url;
+  
+    try {
+      const response = await axios({
+        url: fileUrl,
+        method: "GET",
+        responseType: "stream",
+      });
+      res.setHeader("Content-Type", response.headers["content-type"]);
+      response.data.pipe(res);
+    } catch (error) {
+      console.error("File fetch error:", error);
+      res.status(500).send("Error fetching file");
+    }
+  });  
+
 app.get('/', (req, res) => {
     res.send("Hello, Chat App")
 })

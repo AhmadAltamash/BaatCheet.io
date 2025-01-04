@@ -1,6 +1,6 @@
 import { apiClient } from '@/lib/api-client';
 import { useAppStore } from '@/store'
-import { GET_ALL_MESSAGES_ROUTE, GET_CHANNEL_MESSAGES_ROUTES, HOST } from '@/utils/constants';
+import { DELETE_FILE_ROUTE, DELETE_MESSAGE_ROUTE, GET_ALL_MESSAGES_ROUTE, GET_CHANNEL_MESSAGES_ROUTES, HOST } from '@/utils/constants';
 import moment from 'moment';
 import React, { useEffect, useRef, useState } from 'react'
 import { MdFolderZip } from 'react-icons/md'
@@ -11,6 +11,68 @@ import { getColor } from '@/lib/utils';
 import CryptoJS from 'crypto-js';
 
 const MessageContainer = () => {
+
+  const [contextMenu, setContextMenu] = useState({ visible: false, x: 0, y: 0 });
+  const [selectedMessage, setSelectedMessage] = useState(null);
+  
+  const renderContextMenu = () => {
+    if (!contextMenu.visible) return null; // Hide menu if not visible
+  
+    return (
+      <div
+        className="cursor-pointer absolute bg-purple-800/10 shadow-lg border-purple-800 border-[2px] rounded-md z-50 text-purple-300 "
+        style={{ top: `${contextMenu.y}px`, left: `${contextMenu.x}px` }}
+      >
+        <ul className="py-2">
+          <li
+            className="px-4 py-2 hover:bg-purple-800/40 cursor-pointer"
+            onClick={handleDeleteMessage}
+          >
+            Delete Message
+          </li>
+          {selectedMessage?.messageType === "file" && (
+            <li
+              className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
+              onClick={handleDeleteFile}
+            >
+              Delete File
+            </li>
+          )}
+        </ul>
+      </div>
+    );
+  };
+  
+  const handleDeleteMessage = async () => {
+    try {
+      await apiClient.delete(`${DELETE_MESSAGE_ROUTE}/${selectedMessage._id}`);
+      setContextMenu({ visible: false, x: 0, y: 0 }); // Close context menu
+      fetchMessages(); // Refresh message list
+    } catch (error) {
+      console.error("Failed to delete message:", error);
+    }
+  };
+  
+  const handleDeleteFile = async () => {
+    try {
+      await apiClient.delete(`${DELETE_FILE_ROUTE}/${selectedMessage._id}`);
+      setContextMenu({ visible: false, x: 0, y: 0 }); // Close context menu
+      fetchMessages(); // Refresh message list
+    } catch (error) {
+      console.error("Failed to delete file:", error);
+    }
+  };
+  
+  const handleRightClick = (e, message) => {
+    e.preventDefault(); // Prevent the default context menu
+    setSelectedMessage(message); // Set the message to be acted upon
+    console.log(message)
+    setContextMenu({
+      visible: true,
+      x: e.pageX,
+      y: e.pageY,
+    });
+  };
 
   const scrollRef = useRef();
   const { selectedChatData, selectedChatType, userInfo, selectedChatMessages, setSelectedChatMessages, setFileDownloadProgress,
@@ -93,6 +155,11 @@ const MessageContainer = () => {
       if(selectedChatType === "contact") getMessages();
       else if(selectedChatType === "channel") getChannelMessages();
     }
+
+    const handleClickOutside = () => setContextMenu({ visible: false, x: 0, y: 0 });
+    window.addEventListener("click", handleClickOutside);
+    return () => window.removeEventListener("click", handleClickOutside);
+
   },[selectedChatData, selectedChatType,setSelectedChatMessages])
 
   useEffect(() => {
@@ -109,47 +176,52 @@ const MessageContainer = () => {
 
   const downloadFile = async (url) => {
     setIsDownloading(true);
-    setFileDownloadProgress(0);
-    const response = await apiClient.get(`${url}`, {responseType: "blob",
-      onDownloadProgress: (progressEvent) => {
-        const {loaded, total} = progressEvent;
-        const percentCompleted = Math.round((loaded * 100) / total);
-        setFileDownloadProgress(percentCompleted);
-      }
-    });
-    const urlBlob = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement("a");
-    link.href = urlBlob;
-    link.setAttribute("download", url.split("/").pop());
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.URL.revokeObjectURL(urlBlob)
-    setIsDownloading(false);
-    setFileDownloadProgress(0);
-  }
-
+    try {
+      const response = await axios.get(`/proxy-file?url=${encodeURIComponent(url)}`, {
+        responseType: "blob",
+        onDownloadProgress: (progressEvent) => {
+          const { loaded, total } = progressEvent;
+          const percentCompleted = Math.round((loaded * 100) / total);
+          setFileDownloadProgress(percentCompleted);
+        },
+      });
+      const urlBlob = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = urlBlob;
+      link.setAttribute("download", url.split("/").pop());
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(urlBlob);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+    } finally {
+      setIsDownloading(false);
+      setFileDownloadProgress(0);
+    }
+  };
+  
   const renderMessages = () => {
     let lastDate = null;
-    return selectedChatMessages.map((message, index)=>{
+    return selectedChatMessages.map((message, index) => {
       const messageDate = moment(message.timestamp).format("YYYY-MM-DD");
       const showDate = messageDate !== lastDate;
       lastDate = messageDate;
+      
       return (
-        <div key={index} >
+        <div key={index} onContextMenu={(e) => handleRightClick(e, message)}>
           {showDate && <div className='text-center text-gray-500 my-2'>{moment(message.timestamp).format("LL")}</div>}
           {selectedChatType === "contact" && renderDMMessages(message)}
-
           {selectedChatType === "channel" && renderChannelMessages(message)}
         </div>
-      )
-    })
-  }
+      );
+    });
+  };
 
   const renderDMMessages = (message) => (
-    <div className={`${message.sender === selectedChatData._id ? "text-left" : "text-right"}`}>
+    <div className={`${message.sender === selectedChatData._id ? "text-left" : "text-right"}`} onContextMenu={(e) => handleRightClick(e, message)} >
       {message.messageType === "text" && (
-          <div className={`${message.sender !== selectedChatData._id ? "bg-[#8417ff]/5 text-[#8417ff] border-[#8417ff]/50" : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20 "} border inline-block p-4 rounded my-1 max-w-[50%] break-words`}>{message.content}</div>
+          <div className={`${message.sender !== selectedChatData._id ? "bg-[#8417ff]/5 text-[#8417ff] border-[#8417ff]/50" : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20 "} border inline-block p-4 rounded my-1 max-w-[50%] break-words cursor-pointer`}>{message.content}</div>
         )}
         {
           message.messageType === "file" && (
@@ -182,9 +254,9 @@ const MessageContainer = () => {
 
   const renderChannelMessages = (message) => {
     return (
-      <div className={`mt-5 ${message.sender._id !== userInfo.id ? "text-left" : "text-right"}`}>
+      <div className={`mt-5 ${message.sender._id !== userInfo.id ? "text-left" : "text-right"}`} onContextMenu={(e) => handleRightClick(e, message)} >
         {message.messageType === "text" && (
-          <div className={`${message.sender._id === userInfo.id ? "bg-[#8417ff]/5 text-[#8417ff] border-[#8417ff]/50" : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20 "} border inline-block p-4 rounded my-1 max-w-[50%] break-words`}>{message.content}
+          <div className={`${message.sender._id === userInfo.id ? "bg-[#8417ff]/5 text-[#8417ff] border-[#8417ff]/50" : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20 "} border inline-block p-4 rounded my-1 max-w-[50%] break-words cursor-pointer`}>{message.content}
           </div>
         )}
 
@@ -251,6 +323,7 @@ const MessageContainer = () => {
     <div className='flex-1 overflow-y-auto scrollbar-hide p-4 px-8 md:w-[65vw] lg:w-[70vw] xl:[80vw] w-full'>
       {renderMessages()}
       <div ref={scrollRef} />
+      {renderContextMenu()}
       {
         showImage && (
           <div className='fixed z-[1000] top-0 left-0 h-[100vh] w-[100vw] flex items-center justify-center backdrop-blur-lg flex-col'>

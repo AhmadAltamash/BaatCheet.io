@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { verifyToken } from "../middleware/AuthMiddleware.js";
-import { getMessages, uploadFile, deleteFile } from "../controllers/MessagesController.js";
+import { getMessages, uploadFile, deleteFile, deleteMessage } from "../controllers/MessagesController.js";
 import multer from "multer";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import { v2 as cloudinary } from "cloudinary";
@@ -21,6 +21,7 @@ const messagesRoute = Router();
 // Routes
 messagesRoute.post("/get-messages", verifyToken, getMessages);
 messagesRoute.post("/upload-file", verifyToken, upload.single("file"), uploadFile);
-messagesRoute.delete("/delete-file", verifyToken, deleteFile); // Added delete route
+messagesRoute.delete("/delete-file", verifyToken, deleteFile); // Added delete file route
+messagesRoute.delete("/delete-message", verifyToken, deleteMessage); // New delete message route
 
 export default messagesRoute;

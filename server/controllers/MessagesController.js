@@ -1,5 +1,34 @@
-import Message from "../models/MessagesModel.js";
-import { v2 as cloudinary } from "cloudinary";
+import { Message } from "../models/Message.js";
+import { cloudinary } from "cloudinary"; // To interact with Cloudinary for deleting files
+
+// Controller to delete a message
+export const deleteMessage = async (req, res) => {
+  try {
+    const { messageId } = req.body;  // You should send the message ID to be deleted
+
+    // Find the message in the database
+    const message = await Message.findById(messageId);
+
+    if (!message) {
+      return res.status(404).send({ error: "Message not found" });
+    }
+
+    // If the message has an attached file, delete it from Cloudinary
+    if (message.fileUrl) {
+      const publicId = message.fileUrl.split("/").pop().split(".")[0]; // Extract public ID
+      await cloudinary.uploader.destroy(publicId);
+    }
+
+    // Delete the message from the database
+    await Message.deleteOne({ _id: messageId });
+
+    res.status(200).send({ message: "Message deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: "Failed to delete message" });
+  }
+};
+
 
 // Get messages
 export const getMessages = async (req, res) => {
