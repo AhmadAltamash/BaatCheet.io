@@ -140,29 +140,31 @@ export const updateProfile = async (req, res, next) => {
 
 export const addProfileImage = async (req, res, next) => {
     try {
-        if (!req.file) {
-            return res.status(400).json({ message: "File is required" });
-        }
-
-        const result = await cloudinary.uploader.upload(req.file.path, {
-            folder: "chat-app/profiles",
-        });
-
-        const updatedUser = await User.findByIdAndUpdate(
-            req.userId,
-            { image: result.secure_url },
-            { new: true, runValidators: true }
-        );
-
-        return res.status(200).json({ image: updatedUser.image });
+      if (!req.file) {
+        console.log("File not found", req.file); 
+        return res.status(400).json({ message: "File is required" });
+      }
+  
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "chat-app/profiles",
+      });
+  
+      const updatedUser = await User.findByIdAndUpdate(
+        req.userId,
+        { image: result.secure_url },
+        { new: true, runValidators: true }
+      );
+  
+      return res.status(200).json({ image: updatedUser.image });
     } catch (error) {
-        console.log({ error });
-        return res.status(500).json({
-            message: "Error updating profile",
-            error: error.message,
-        });
+      console.log({ error });
+      return res.status(500).json({
+        message: "Error updating profile",
+        error: error.message,
+      });
     }
-};
+  };
+  
 
 export const removeProfileImage = async (req, res, next) => {
     try {
