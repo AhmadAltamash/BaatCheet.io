@@ -1,5 +1,5 @@
-import { Message } from "../models/MessagesModel.js";
-import { cloudinary } from "cloudinary"; // To interact with Cloudinary for deleting files
+import Message from "../models/MessagesModel.js";
+import { v2 as cloudinary } from "cloudinary"; // To interact with Cloudinary for deleting files
 
 // Controller to delete a message
 export const deleteMessage = async (req, res) => {
