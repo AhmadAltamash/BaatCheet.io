@@ -1,10 +1,9 @@
 import pkg from "jsonwebtoken";
 import User from "../models/UserModel.js";
 import { compare } from "bcrypt";
-import { renameSync, unlinkSync } from 'fs'
 import { v2 as cloudinary } from 'cloudinary';
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import dotenv from 'dotenv';
+import multer from "multer";
 
 dotenv.config();
 
@@ -14,6 +13,16 @@ cloudinary.config({
     api_secret: process.env.CLOUD_API_SECRET,
 });
 
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/profiles'); 
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + file.originalname);
+    }
+});
+
+const upload = multer({ storage });
 
 const { sign } = pkg
 const maxAge = 3 * 24 * 60 * 60 * 1000;
@@ -68,10 +77,10 @@ export const login = async (req, res, next) => {
         }
 
         res.cookie("jwt", createToken(email, user.id), {
-            httpOnly: true,                   // Prevent access via JavaScript
-            secure: process.env.NODE_ENV === "production", // Use Secure flag only in production
-            sameSite: 'None',                 // Allow cross-origin cookies
-            maxAge: maxAge                    // Cookie expiration
+            httpOnly: true,                   
+            secure: process.env.NODE_ENV === "production", 
+            sameSite: 'None',          
+            maxAge: maxAge           
         });
         
         return res.status(200).json({ user: {
@@ -137,35 +146,34 @@ export const updateProfile = async (req, res, next) => {
         return res.status(500).json({ message: "Error updating profile", error: error.message });
     }
 };
+
 export const addProfileImage = async (req, res, next) => {
     try {
-      if (!req.file) {
-        return res.status(400).json({ message: "File is required" });
-      }
-  
-      console.log("Received file:", req.file);  // Log the file object
-  
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "chat-app/profiles",
-      });
-  
-      console.log("Cloudinary upload result:", result);  // Log the result of Cloudinary upload
-  
-      const updatedUser = await User.findByIdAndUpdate(
-        req.userId,
-        { image: result.secure_url },
-        { new: true, runValidators: true }
-      );
-  
-      return res.status(200).json({ image: updatedUser.image });
+        if (!req.file) {
+            return res.status(400).json({ message: "File is required" });
+        }
+
+        // Upload to Cloudinary
+        const result = await cloudinary.uploader.upload(req.file.path, {
+            folder: "chat-app/profiles",
+        });
+
+        // Update user profile with the uploaded image URL
+        const updatedUser = await User.findByIdAndUpdate(
+            req.userId,
+            { image: result.secure_url },
+            { new: true, runValidators: true }
+        );
+
+        return res.status(200).json({ image: updatedUser.image });
     } catch (error) {
-      console.error("Error updating profile image:", error);  // Log the full error
-      return res.status(500).json({
-        message: "Error updating profile",
-        error: error.message,
-      });
+        console.log({ error });
+        return res.status(500).json({
+            message: "Error updating profile",
+            error: error.message,
+        });
     }
-  };
+};
   
 export const removeProfileImage = async (req, res, next) => {
     try {

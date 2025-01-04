@@ -2,7 +2,6 @@ import { Router } from "express";
 import { getUserInfo, login, signup, updateProfile, addProfileImage, removeProfileImage, logout } from '../controllers/AuthController.js'
 import { verifyToken } from "../middleware/AuthMiddleware.js";
 import multer from 'multer';
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import { v2 as cloudinary } from 'cloudinary';
 import dotenv from 'dotenv';
 
@@ -14,12 +13,13 @@ cloudinary.config({
     api_secret: process.env.CLOUD_API_SECRET,
 });
 
-const storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-        folder: 'chat-app/profiles',
-        allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'avif'],
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/profiles'); // Temporary file storage
     },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + file.originalname); // Unique filename
+    }
 });
 
 const upload = multer({ storage });
@@ -27,11 +27,11 @@ const upload = multer({ storage });
 const authRoutes = Router();
 
 authRoutes.post("/signup", signup);
-authRoutes.post('/login', login)
+authRoutes.post('/login', login);
 authRoutes.get('/user-info', verifyToken, getUserInfo);
 authRoutes.post('/update-profile', verifyToken, updateProfile);
-authRoutes.post('/add-profile-image', verifyToken, upload.single("profile-image"), addProfileImage)
-authRoutes.delete("/remove-profile-image", verifyToken, removeProfileImage)
-authRoutes.post("/logout", logout)
+authRoutes.post('/add-profile-image', verifyToken, upload.single("profile-image"), addProfileImage);  // Add profile image
+authRoutes.delete("/remove-profile-image", verifyToken, removeProfileImage);
+authRoutes.post("/logout", logout);
 
 export default authRoutes;
