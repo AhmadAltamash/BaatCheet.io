@@ -110,7 +110,7 @@ const MessageContainer = () => {
   const downloadFile = async (url) => {
     setIsDownloading(true);
     setFileDownloadProgress(0);
-    const response = await apiClient.get(`${HOST}${url}`, {responseType: "blob",
+    const response = await apiClient.get(`${url}`, {responseType: "blob",
       onDownloadProgress: (progressEvent) => {
         const {loaded, total} = progressEvent;
         const percentCompleted = Math.round((loaded * 100) / total);
@@ -159,7 +159,7 @@ const MessageContainer = () => {
                 setImageUrl(message.fileUrl);
               }} >
                 <img
-                  src={`${HOST}${message.fileUrl}`}
+                  src={`${message.fileUrl}`}
                   alt="file"
                   height={100}
                   width={100}
@@ -196,7 +196,7 @@ const MessageContainer = () => {
                 setImageUrl(message.fileUrl);
               }} >
                 <img
-                  src={`${HOST}${message.fileUrl}`}
+                  src={`${message.fileUrl}`}
                   alt="file"
                   height={100}
                   width={100}
@@ -220,7 +220,7 @@ const MessageContainer = () => {
                <Avatar className="w-8 h-8 rounded-full overflow-hidden">
                 {message.sender?.image && (
                   <AvatarImage
-                    src={`${HOST}${message.sender.image}`}
+                    src={`${message.sender.image}`}
                     alt="profile"
                     className="object-cover w-full h-full bg-black"
                     onError={(e) => {
@@ -256,7 +256,7 @@ const MessageContainer = () => {
           <div className='fixed z-[1000] top-0 left-0 h-[100vh] w-[100vw] flex items-center justify-center backdrop-blur-lg flex-col'>
             <div>
               <img
-                src={`${HOST}${imageUrl}`}
+                src={`${imageUrl}`}
                 className='h-[80vh] w-full bg-cover'
               /> 
             </div>

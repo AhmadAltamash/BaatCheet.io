@@ -30,7 +30,7 @@ const Profile = () => {
     }
   
     if (userInfo.image) {
-      const imageUrl = `${HOST}${userInfo.image}`;
+      const imageUrl = `${userInfo.image}`;
       setImage(imageUrl);
     }
   }, [userInfo]);
