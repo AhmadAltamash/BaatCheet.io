@@ -1,21 +1,19 @@
+import fs from 'fs';
+import path from 'path';
 import { Router } from "express";
-import { getUserInfo, login, signup, updateProfile, addProfileImage, removeProfileImage, logout } from '../controllers/AuthController.js'
+import { getUserInfo, login, signup, updateProfile, addProfileImage, removeProfileImage, logout } from '../controllers/AuthController.js';
 import { verifyToken } from "../middleware/AuthMiddleware.js";
 import multer from 'multer';
-import { v2 as cloudinary } from 'cloudinary';
-import dotenv from 'dotenv';
 
-dotenv.config();
-
-cloudinary.config({
-    cloud_name: process.env.CLOUD_NAME,
-    api_key: process.env.CLOUD_API_KEY,
-    api_secret: process.env.CLOUD_API_SECRET,
-});
+// Create uploads/profiles folder if it doesn't exist
+const uploadDir = path.join(__dirname, 'uploads', 'profiles');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });  // Creates the directory if it doesn't exist
+}
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'uploads/profiles'); // Temporary file storage
+        cb(null, uploadDir); // Use the correct folder
     },
     filename: (req, file, cb) => {
         cb(null, Date.now() + file.originalname); // Unique filename
