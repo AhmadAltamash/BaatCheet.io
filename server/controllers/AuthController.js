@@ -2,6 +2,18 @@ import pkg from "jsonwebtoken";
 import User from "../models/UserModel.js";
 import { compare } from "bcrypt";
 import { renameSync, unlinkSync } from 'fs'
+import { v2 as cloudinary } from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+cloudinary.config({
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.CLOUD_API_KEY,
+    api_secret: process.env.CLOUD_API_SECRET,
+});
+
 
 const { sign } = pkg
 const maxAge = 3 * 24 * 60 * 60 * 1000;
@@ -125,52 +137,61 @@ export const updateProfile = async (req, res, next) => {
         return res.status(500).json({ message: "Error updating profile", error: error.message });
     }
 };
+
 export const addProfileImage = async (req, res, next) => {
     try {
-        if(!req.file) {
+        if (!req.file) {
             return res.status(400).json({ message: "File is required" });
         }
 
-        const date = Date.now();
-        let fileName = "uploads/profiles/" + date + req.file.originalname;
-        renameSync(req.file.path, fileName)
-
-        const updatedUser = await User.findByIdAndUpdate(req.userId, {image: fileName}, { new: true, runValidators: true })
-
-        return res.status(200).json({
-            image: updatedUser.image,
+        const result = await cloudinary.uploader.upload(req.file.path, {
+            folder: "chat-app/profiles",
         });
+
+        const updatedUser = await User.findByIdAndUpdate(
+            req.userId,
+            { image: result.secure_url },
+            { new: true, runValidators: true }
+        );
+
+        return res.status(200).json({ image: updatedUser.image });
     } catch (error) {
         console.log({ error });
-        return res.status(500).json({ message: "Error updating profile", error: error.message });
+        return res.status(500).json({
+            message: "Error updating profile",
+            error: error.message,
+        });
     }
 };
-
 
 export const removeProfileImage = async (req, res, next) => {
     try {
         const { userId } = req;
-        
+
         const user = await User.findById(userId);
 
-        if(!user) {
-            return res.status(404).send("User not Found");
+        if (!user) {
+            return res.status(404).send("User not found");
         }
 
-        if(user.image) {
-            unlinkSync(user.image)
+        if (user.image) {
+            const publicId = user.image.split('/').pop().split('.')[0];
+            await cloudinary.uploader.destroy(`chat-app/profiles/${publicId}`);
         }
 
         user.image = null;
-
         await user.save();
 
-        return res.status(200).send("Profile image removed successfully")
+        return res.status(200).send("Profile image removed successfully");
     } catch (error) {
         console.log({ error });
-        return res.status(500).json({ message: "Error removing profile", error: error.message });
+        return res.status(500).json({
+            message: "Error removing profile",
+            error: error.message,
+        });
     }
 };
+
 
 export const logout = async (req, res, next) => {
     try {

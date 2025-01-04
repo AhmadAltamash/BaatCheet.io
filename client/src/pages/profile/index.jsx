@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { apiClient } from "@/lib/api-client";
-import { ADD_PROFILE_IMAGE_ROUTE, HOST, REMOVE_PROFILE_IMAGE_ROUTE, UPDATE_PROFILE_ROUTE } from "@/utils/constants";
+import { ADD_PROFILE_IMAGE_ROUTE, HOST, REMOVE_PROFILE_IMAGE_ROUTE, UPDATE_PROFILE_ROUTE, CLOUDINARY_UPLOAD_PRESET, CLOUDINARY_URL } from "@/utils/constants";
 
 const Profile = () => {
 
@@ -81,30 +81,56 @@ const Profile = () => {
 
   const handleImageChange = async (event) => {
     const file = event.target.files[0];
-    console.log({file})
-    if(file) {
+    if (file) {
       const formData = new FormData();
-      formData.append("profile-image", file);
-      const response = await apiClient.post(ADD_PROFILE_IMAGE_ROUTE, formData, {withCredentials:true})
-        if(response.status === 200 && response.data.image){
-        setUserInfo({...userInfo, image: response.data.image })
-        toast.success("Profile image updated successfully");
+      formData.append("file", file);
+      formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+  
+      try {
+        const cloudinaryResponse = await fetch(CLOUDINARY_URL, {
+          method: "POST",
+          body: formData,
+        });
+  
+        const cloudinaryData = await cloudinaryResponse.json();
+        if (cloudinaryData.secure_url) {
+          const response = await apiClient.post(
+            ADD_PROFILE_IMAGE_ROUTE,
+            { image: cloudinaryData.secure_url },
+            { withCredentials: true }
+          );
+  
+          if (response.status === 200 && response.data.image) {
+            setUserInfo({ ...userInfo, image: response.data.image });
+            toast.success("Profile image updated successfully");
+            setImage(cloudinaryData.secure_url); 
+          }
+        }
+      } catch (error) {
+        console.log(error);
+        toast.error("Error uploading image");
       }
     }
-  }
+  };
+  
 
   const handleDeleteImage = async () => {
     try {
-      const response = await apiClient.delete(REMOVE_PROFILE_IMAGE_ROUTE, { withCredentials: true })
+      const response = await apiClient.delete(REMOVE_PROFILE_IMAGE_ROUTE, {
+        withCredentials: true,
+      });
+  
       if (response.status === 200) {
-        setUserInfo({...userInfo, image: null})
-        toast.success("Image Removed Successfully")
+        setUserInfo({ ...userInfo, image: null });
+        toast.success("Image removed successfully");
         setImage(null);
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
+      toast.error("Error removing image");
     }
-  }
+  };
+  
 
   return (
     <div className="bg-[#1b1c24] h-[100vh] flex items-center justify-center gap-10">

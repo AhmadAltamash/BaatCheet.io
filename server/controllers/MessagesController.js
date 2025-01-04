@@ -27,21 +27,21 @@ export const getMessages = async (req, res, next) => {
 
 export const uploadFile = async (req, res, next) => {
     try {
-        
-        if(!req.file) {
-            return res.status(400).send("No file uploaded")
+        if (!req.file) {
+            return res.status(400).send("No file uploaded");
         }
 
-        const date = Date.now();
-        let fileDir = `uploads/files/${date}`;
-        let fileName = `${fileDir}/${req.file.originalname}`;
+        const result = await cloudinary.uploader.upload(req.file.path, {
+            folder: "chat-app/files", 
+            resource_type: "auto",
+        });
 
-        mkdirSync(fileDir,{recursive : true});
-        renameSync(req.file.path, fileName);
-
-        return res.status(200).json({ filePath: fileName })
+        return res.status(200).json({ filePath: result.secure_url });
     } catch (error) {
         console.log({ error });
-        return res.status(500).json({ message: "Could Not fetch messages", error: error.message });
+        return res.status(500).json({
+            message: "Could not upload file",
+            error: error.message,
+        });
     }
 };
