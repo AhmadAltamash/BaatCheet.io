@@ -137,17 +137,19 @@ export const updateProfile = async (req, res, next) => {
         return res.status(500).json({ message: "Error updating profile", error: error.message });
     }
 };
-
 export const addProfileImage = async (req, res, next) => {
     try {
       if (!req.file) {
-        console.log("File not found", req.file); 
         return res.status(400).json({ message: "File is required" });
       }
+  
+      console.log("Received file:", req.file);  // Log the file object
   
       const result = await cloudinary.uploader.upload(req.file.path, {
         folder: "chat-app/profiles",
       });
+  
+      console.log("Cloudinary upload result:", result);  // Log the result of Cloudinary upload
   
       const updatedUser = await User.findByIdAndUpdate(
         req.userId,
@@ -157,7 +159,7 @@ export const addProfileImage = async (req, res, next) => {
   
       return res.status(200).json({ image: updatedUser.image });
     } catch (error) {
-      console.log({ error });
+      console.error("Error updating profile image:", error);  // Log the full error
       return res.status(500).json({
         message: "Error updating profile",
         error: error.message,
@@ -165,7 +167,6 @@ export const addProfileImage = async (req, res, next) => {
     }
   };
   
-
 export const removeProfileImage = async (req, res, next) => {
     try {
         const { userId } = req;
