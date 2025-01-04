@@ -1,4 +1,4 @@
-import { Message } from "../models/Message.js";
+import { Message } from "../models/MessagesModel.js";
 import { cloudinary } from "cloudinary"; // To interact with Cloudinary for deleting files
 
 // Controller to delete a message
