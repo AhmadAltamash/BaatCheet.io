@@ -3,6 +3,7 @@ import { Router } from 'express'
 const proxyRoutes = Router()
 
 proxyRoutes.get("/proxy-file", async (req, res) => {
+    console.log("Received a request for proxy-file route");
     const fileUrl = req.query.url;
   
     console.log(fileUrl)
