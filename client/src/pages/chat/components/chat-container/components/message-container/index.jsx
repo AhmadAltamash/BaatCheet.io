@@ -252,6 +252,21 @@ const MessageContainer = () => {
 };
 
 
+    // const downloadFile = async (url) => {
+    //   console.log(url)
+    //   const response = await apiClient.get(url , {
+    //     responseType: "blob",
+    //   });
+    //   const urlBlob = window.URL.createObjectURL(new Blob([response.data]))
+    //   const link = document.createElement("a");
+    //   link.href = urlBlob;
+    //   link.setAttribute("download", url.split("/").pop());
+    //   document.body.appendChild(link);
+    //   link.click();
+    //   link.remove();
+    //   window.URL.revokeObjectURL(urlBlob);
+    // }
+
   const renderMessages = () => {
     let lastDate = null;
     return selectedChatMessages.map((message, index) => {

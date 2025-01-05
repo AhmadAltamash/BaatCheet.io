@@ -45,6 +45,10 @@ setupSocket(server);
 
 mongoose.connect(databaseURL).then(() => console.log(`MongoDB Connected on ${databaseURL}`)).catch((error)=> console.log(error))
 
+app.get('/', (req, res) => {
+    res.send("Hello, Chat App")
+});
+
 app.get("/proxy-file", async (req, res) => {
   const fileUrl = req.query.url;
 
@@ -86,8 +90,3 @@ app.get("/proxy-file", async (req, res) => {
       res.status(500).json({ message: "Error fetching file", error: error.message });
   }
 });
-
-
-app.get('/', (req, res) => {
-    res.send("Hello, Chat App")
-})
