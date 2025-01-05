@@ -95,6 +95,7 @@ const MessageBar = () => {
             setFileUploadProgress(Math.round((100 * data.loaded) / data.total))
           },
         });
+        console.log(response)
 
         if(response.status === 200 && response.data) {
           setIsUploading(false);
