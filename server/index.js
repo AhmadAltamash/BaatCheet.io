@@ -53,7 +53,6 @@ app.get("/proxy-file", async (req, res) => {
           return res.status(400).json({ message: "File URL is required." });
       }
 
-      // Check if the file URL is a valid Cloudinary URL
       if (!fileUrl.startsWith("https://res.cloudinary.com/")) {
           return res.status(400).json({ message: "Invalid file URL." });
       }
@@ -64,18 +63,22 @@ app.get("/proxy-file", async (req, res) => {
           responseType: "stream",
       });
 
+      // Log the content type for debugging
+      console.log("Content-Type:", response.headers["content-type"]);
+
       // Extract file name from URL
       const fileName = decodeURIComponent(fileUrl.split("/").pop());
       const contentType = response.headers["content-type"];
 
-      // Ensure the file is an image or acceptable file type
+      // Debug the content type
       if (!contentType.startsWith("image") && !contentType.startsWith("application")) {
+          console.error("Invalid content type:", contentType);
           return res.status(400).json({ message: "Invalid file type." });
       }
 
-      // Set the appropriate headers
+      // Set headers to ensure the file is served as an attachment
       res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
-      res.setHeader("Content-Type", contentType); // Ensure correct content type
+      res.setHeader("Content-Type", contentType); // Ensure the correct content type
 
       // Pipe the file to the response
       response.data.pipe(res);
@@ -85,8 +88,6 @@ app.get("/proxy-file", async (req, res) => {
       res.status(500).json({ message: "Error fetching file", error: error.message });
   }
 });
-
-
 
 app.get('/', (req, res) => {
     res.send("Hello, Chat App")

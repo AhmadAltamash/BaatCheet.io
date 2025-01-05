@@ -212,23 +212,24 @@ const MessageContainer = () => {
     setIsDownloading(true);
     try {
         const response = await axios.get(
-            `/api/proxy-file?url=${encodeURIComponent(url)}`, // Updated to match backend route
+            `/api/proxy-file?url=${encodeURIComponent(url)}`, 
             {
-                responseType: "blob", // Ensures binary data handling
+                responseType: "blob",
                 onDownloadProgress: (progressEvent) => {
                     const { loaded, total } = progressEvent;
                     const percentCompleted = Math.round((loaded * 100) / total);
-                    setFileDownloadProgress(percentCompleted); // Progress bar
+                    setFileDownloadProgress(percentCompleted);
                 },
             }
         );
 
-        console.log(response);
+        console.log("Response received:", response);
 
-        // Ensure the response is a valid file (check for content-type)
+        // Ensure the response is a blob
         const contentType = response.headers["content-type"];
         if (!contentType.startsWith("image") && !contentType.startsWith("application")) {
-            throw new Error("Invalid file type received.");
+            console.error("Invalid file type received:", contentType);
+            return;
         }
 
         // Create a blob URL for the downloaded file
@@ -247,7 +248,6 @@ const MessageContainer = () => {
         setFileDownloadProgress(0);
     }
 };
-
 
   const renderMessages = () => {
     let lastDate = null;
