@@ -64,28 +64,19 @@ export const uploadFile = async (req, res) => {
             "image/jpeg", "image/png", "image/gif", "image/webp",
             "application/pdf", "video/mp4", "application/zip"
         ];
-
+          
         if (!allowedMimeTypes.includes(req.file.mimetype)) {
             return res.status(400).send("Invalid file type.");
         }
 
-        // Check if the file is an image
-        const isImage = req.file.mimetype.startsWith("image/");
-
-        // Set the resource_type based on whether it's an image or not
-        const resourceType = isImage ? "image" : "raw";
-
-        // Log file info for debugging
-        console.log("File info:", req.file);
+        // Determine the resource type based on the MIME type
+        const resourceType = req.file.mimetype.startsWith("image") ? "image" : "auto";
 
         // Upload file to Cloudinary
         const result = await cloudinary.uploader.upload(req.file.path, {
             folder: "chat-app/files",
-            resource_type: resourceType, // Set resource_type based on file type
+            resource_type: resourceType,  // Use "image" for image files, "auto" for others
         });
-
-        // Log Cloudinary response for debugging
-        console.log("Cloudinary upload response:", result);
 
         res.status(200).json({ filePath: result.secure_url });
     } catch (error) {
@@ -93,6 +84,7 @@ export const uploadFile = async (req, res) => {
         res.status(500).json({ message: "Could not upload file", error: error.message });
     }
 };
+
 
 // Delete file
 export const deleteFile = async (req, res) => {
