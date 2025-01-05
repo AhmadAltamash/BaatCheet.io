@@ -208,25 +208,31 @@ const MessageContainer = () => {
   };
 
   const downloadFile = async (url) => {
+    console.log(url)
     setIsDownloading(true);
     try {
-        const response = await axios.get(`/proxy-file?url=${encodeURIComponent(url)}`, {
-            responseType: "blob",
-            onDownloadProgress: (progressEvent) => {
-                const { loaded, total } = progressEvent;
-                const percentCompleted = Math.round((loaded * 100) / total);
-                setFileDownloadProgress(percentCompleted);
-            },
-        });
+        const response = await axios.get(
+            `/api/proxy-file?url=${encodeURIComponent(url)}`, // Updated to match backend route
+            {
+                responseType: "blob", // Ensures binary data handling
+                onDownloadProgress: (progressEvent) => {
+                    const { loaded, total } = progressEvent;
+                    const percentCompleted = Math.round((loaded * 100) / total);
+                    setFileDownloadProgress(percentCompleted); // Progress bar
+                },
+            }
+        );
+        console.log(response)
 
+        // Create a blob URL for the downloaded file
         const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement("a");
         link.href = blobUrl;
-        link.setAttribute("download", url.split("/").pop());
+        link.setAttribute("download", url.split("/").pop()); // Extract file name
         document.body.appendChild(link);
         link.click();
         link.remove();
-        window.URL.revokeObjectURL(blobUrl);
+        window.URL.revokeObjectURL(blobUrl); // Clean up blob URL
     } catch (error) {
         console.error("Error downloading file:", error);
     } finally {
@@ -234,6 +240,7 @@ const MessageContainer = () => {
         setFileDownloadProgress(0);
     }
 };
+
 
   
   const renderMessages = () => {

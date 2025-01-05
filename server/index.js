@@ -46,30 +46,33 @@ setupSocket(server);
 mongoose.connect(databaseURL).then(() => console.log(`MongoDB Connected on ${databaseURL}`)).catch((error)=> console.log(error))
 
 app.get("/proxy-file", async (req, res) => {
-    const fileUrl = req.query.url;
+  const fileUrl = req.query.url;
 
-    try {
-        if (!fileUrl) {
-            return res.status(400).json({ message: "File URL is required." });
-        }
+  try {
+      if (!fileUrl) {
+          return res.status(400).json({ message: "File URL is required." });
+      }
 
-        const response = await axios({
-            url: fileUrl,
-            method: "GET",
-            responseType: "stream",
-        });
+      const response = await axios({
+          url: fileUrl,
+          method: "GET",
+          responseType: "stream",
+      });
 
-        res.setHeader(
-            "Content-Disposition",
-            `attachment; filename="${decodeURIComponent(fileUrl.split("/").pop())}"`
-        );
+      // Extract the file name and content type from the response headers
+      const fileName = decodeURIComponent(fileUrl.split("/").pop());
+      const contentType = response.headers["content-type"];
 
-        response.data.pipe(res);
-    } catch (error) {
-        console.error("Error fetching file:", error.message);
-        res.status(500).json({ message: "Error fetching file", error: error.message });
-    }
+      res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+      res.setHeader("Content-Type", contentType); // Ensure proper content-type
+
+      response.data.pipe(res);
+  } catch (error) {
+      console.error("Error fetching file:", error.message);
+      res.status(500).json({ message: "Error fetching file", error: error.message });
+  }
 });
+
 
 app.get('/', (req, res) => {
     res.send("Hello, Chat App")
