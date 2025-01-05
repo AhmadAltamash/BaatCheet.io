@@ -225,10 +225,11 @@ const MessageContainer = () => {
 
         console.log("Response received:", response);
 
-        // Ensure the response is a blob
+        // Ensure the response is a blob and check content type
         const contentType = response.headers["content-type"];
         if (!contentType.startsWith("image") && !contentType.startsWith("application")) {
             console.error("Invalid file type received:", contentType);
+            alert("Invalid file type received.");
             return;
         }
 
@@ -243,11 +244,13 @@ const MessageContainer = () => {
         window.URL.revokeObjectURL(blobUrl); // Clean up blob URL
     } catch (error) {
         console.error("Error downloading file:", error);
+        alert("Error downloading file.");
     } finally {
         setIsDownloading(false);
         setFileDownloadProgress(0);
     }
 };
+
 
   const renderMessages = () => {
     let lastDate = null;

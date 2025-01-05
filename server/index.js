@@ -25,8 +25,8 @@ app.use(cors({
 }));
 
 
-app.use("/uploads/profiles", express.static("uploads/profiles"));
-app.use("/uploads/files", express.static("uploads/files"));
+// app.use("/uploads/profiles", express.static("uploads/profiles"));
+// app.use("/uploads/files", express.static("uploads/files"));
 
 app.use(cookieParser());
 app.use(express.json());
@@ -48,6 +48,8 @@ mongoose.connect(databaseURL).then(() => console.log(`MongoDB Connected on ${dat
 app.get("/proxy-file", async (req, res) => {
   const fileUrl = req.query.url;
 
+  console.log(fileUrl)
+
   try {
       if (!fileUrl) {
           return res.status(400).json({ message: "File URL is required." });
@@ -63,31 +65,28 @@ app.get("/proxy-file", async (req, res) => {
           responseType: "stream",
       });
 
-      // Log the content type for debugging
-      console.log("Content-Type:", response.headers["content-type"]);
-
-      // Extract file name from URL
-      const fileName = decodeURIComponent(fileUrl.split("/").pop());
+      // Check if content-type is valid (e.g., image/*)
       const contentType = response.headers["content-type"];
-
-      // Debug the content type
       if (!contentType.startsWith("image") && !contentType.startsWith("application")) {
           console.error("Invalid content type:", contentType);
           return res.status(400).json({ message: "Invalid file type." });
       }
 
-      // Set headers to ensure the file is served as an attachment
+      // Log the content type for debugging
+      console.log("Content-Type:", contentType);
+
+      // Set headers for file download
+      const fileName = decodeURIComponent(fileUrl.split("/").pop());
       res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
-      res.setHeader("Content-Type", contentType); // Ensure the correct content type
+      res.setHeader("Content-Type", contentType); 
 
-      // Pipe the file to the response
-      response.data.pipe(res);
-
+      response.data.pipe(res); // Pipe the file to the response
   } catch (error) {
       console.error("Error fetching file:", error.message);
       res.status(500).json({ message: "Error fetching file", error: error.message });
   }
 });
+
 
 app.get('/', (req, res) => {
     res.send("Hello, Chat App")
