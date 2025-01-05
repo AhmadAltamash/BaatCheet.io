@@ -208,7 +208,7 @@ const MessageContainer = () => {
   };
 
   const downloadFile = async (url) => {
-    console.log(url)
+    console.log(url);
     setIsDownloading(true);
     try {
         const response = await axios.get(
@@ -222,7 +222,14 @@ const MessageContainer = () => {
                 },
             }
         );
-        console.log(response)
+
+        console.log(response);
+
+        // Ensure the response is a valid file (check for content-type)
+        const contentType = response.headers["content-type"];
+        if (!contentType.startsWith("image") && !contentType.startsWith("application")) {
+            throw new Error("Invalid file type received.");
+        }
 
         // Create a blob URL for the downloaded file
         const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
@@ -242,7 +249,6 @@ const MessageContainer = () => {
 };
 
 
-  
   const renderMessages = () => {
     let lastDate = null;
     return selectedChatMessages.map((message, index) => {

@@ -53,25 +53,39 @@ app.get("/proxy-file", async (req, res) => {
           return res.status(400).json({ message: "File URL is required." });
       }
 
+      // Check if the file URL is a valid Cloudinary URL
+      if (!fileUrl.startsWith("https://res.cloudinary.com/")) {
+          return res.status(400).json({ message: "Invalid file URL." });
+      }
+
       const response = await axios({
           url: fileUrl,
           method: "GET",
           responseType: "stream",
       });
 
-      // Extract the file name and content type from the response headers
+      // Extract file name from URL
       const fileName = decodeURIComponent(fileUrl.split("/").pop());
       const contentType = response.headers["content-type"];
 
-      res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
-      res.setHeader("Content-Type", contentType); // Ensure proper content-type
+      // Ensure the file is an image or acceptable file type
+      if (!contentType.startsWith("image") && !contentType.startsWith("application")) {
+          return res.status(400).json({ message: "Invalid file type." });
+      }
 
+      // Set the appropriate headers
+      res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+      res.setHeader("Content-Type", contentType); // Ensure correct content type
+
+      // Pipe the file to the response
       response.data.pipe(res);
+
   } catch (error) {
       console.error("Error fetching file:", error.message);
       res.status(500).json({ message: "Error fetching file", error: error.message });
   }
 });
+
 
 
 app.get('/', (req, res) => {
