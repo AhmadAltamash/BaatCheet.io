@@ -54,7 +54,7 @@ export const getMessages = async (req, res) => {
 };
 
 // Upload file
-export const uploadFile = async (req, res) => {
+const uploadFile = async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).send("No file uploaded.");
@@ -64,19 +64,26 @@ export const uploadFile = async (req, res) => {
             "image/jpeg", "image/png", "image/gif", "image/webp",
             "application/pdf", "video/mp4", "application/zip"
         ];
-          
+
         if (!allowedMimeTypes.includes(req.file.mimetype)) {
             return res.status(400).send("Invalid file type.");
         }
 
-        // Determine the resource type based on the MIME type
-        const resourceType = req.file.mimetype.startsWith("image") ? "image" : "auto";
-
-        // Upload file to Cloudinary
         const result = await cloudinary.uploader.upload(req.file.path, {
             folder: "chat-app/files",
-            resource_type: resourceType,  // Use "image" for image files, "auto" for others
+            resource_type: req.file.mimetype.startsWith("image") ? "image" : "auto", // Choose resource type based on file type
         });
+
+        // Save file URL to MongoDB
+        const message = new Message({
+            sender: req.userId,
+            recipient: req.body.recipientId, // Assuming recipientId is passed in the request
+            messageType: "file", // Set messageType as 'file'
+            fileUrl: result.secure_url, // Cloudinary URL
+            timestamp: new Date(),
+        });
+
+        await message.save(); // Save to database
 
         res.status(200).json({ filePath: result.secure_url });
     } catch (error) {
@@ -84,6 +91,7 @@ export const uploadFile = async (req, res) => {
         res.status(500).json({ message: "Could not upload file", error: error.message });
     }
 };
+
 
 
 // Delete file
