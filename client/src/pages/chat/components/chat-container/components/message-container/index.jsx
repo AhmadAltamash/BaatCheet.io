@@ -210,29 +210,31 @@ const MessageContainer = () => {
   const downloadFile = async (url) => {
     setIsDownloading(true);
     try {
-      const response = await axios.get(`/proxy-file?url=${encodeURIComponent(url)}`, {
-        responseType: "blob",
-        onDownloadProgress: (progressEvent) => {
-          const { loaded, total } = progressEvent;
-          const percentCompleted = Math.round((loaded * 100) / total);
-          setFileDownloadProgress(percentCompleted);
-        },
-      });
-      const urlBlob = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = urlBlob;
-      link.setAttribute("download", url.split("/").pop());
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(urlBlob);
+        const response = await axios.get(`/proxy-file?url=${encodeURIComponent(url)}`, {
+            responseType: "blob",
+            onDownloadProgress: (progressEvent) => {
+                const { loaded, total } = progressEvent;
+                const percentCompleted = Math.round((loaded * 100) / total);
+                setFileDownloadProgress(percentCompleted);
+            },
+        });
+
+        const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement("a");
+        link.href = blobUrl;
+        link.setAttribute("download", url.split("/").pop());
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
-      console.error("Error downloading file:", error);
+        console.error("Error downloading file:", error);
     } finally {
-      setIsDownloading(false);
-      setFileDownloadProgress(0);
+        setIsDownloading(false);
+        setFileDownloadProgress(0);
     }
-  };
+};
+
   
   const renderMessages = () => {
     let lastDate = null;

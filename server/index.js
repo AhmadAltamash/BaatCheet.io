@@ -9,6 +9,7 @@ import setupSocket from './socket.js'
 import messagesRoute from './routes/MessagesRoute.js'
 import channelRoutes from './routes/ChannelRoutes.js'
 import uploadRoutes from './routes/UploadRoutes.js'
+import axios from 'axios';
 
 dotenv.config();
 
@@ -45,24 +46,30 @@ setupSocket(server);
 mongoose.connect(databaseURL).then(() => console.log(`MongoDB Connected on ${databaseURL}`)).catch((error)=> console.log(error))
 
 app.get("/proxy-file", async (req, res) => {
-  const fileUrl = req.query.url;
+    const fileUrl = req.query.url;
 
-  try {
-      const response = await axios({
-          url: fileUrl,
-          method: "GET",
-          responseType: "stream",
-      });
+    try {
+        if (!fileUrl) {
+            return res.status(400).json({ message: "File URL is required." });
+        }
 
-      const fileName = decodeURIComponent(fileUrl.split("/").pop());
-      res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
-      response.data.pipe(res);
-  } catch (error) {
-      console.error("File fetch error:", error);
-      res.status(500).send("Error fetching file");
-  }
+        const response = await axios({
+            url: fileUrl,
+            method: "GET",
+            responseType: "stream",
+        });
+
+        res.setHeader(
+            "Content-Disposition",
+            `attachment; filename="${decodeURIComponent(fileUrl.split("/").pop())}"`
+        );
+
+        response.data.pipe(res);
+    } catch (error) {
+        console.error("Error fetching file:", error.message);
+        res.status(500).json({ message: "Error fetching file", error: error.message });
+    }
 });
-
 
 app.get('/', (req, res) => {
     res.send("Hello, Chat App")
