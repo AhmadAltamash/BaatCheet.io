@@ -56,7 +56,9 @@ const MessageContainer = () => {
   
   const handleDeleteFile = async () => {
     try {
-      await apiClient.delete(`${DELETE_FILE_ROUTE}/${selectedMessage._id}`);
+      await apiClient.delete(`${DELETE_FILE_ROUTE}`, {
+        data: { fileUrl: selectedMessage.fileUrl },
+      });      
       setContextMenu({ visible: false, x: 0, y: 0 }); // Close context menu
       fetchMessages(); // Refresh message list
     } catch (error) {
@@ -66,35 +68,13 @@ const MessageContainer = () => {
   
   const handleRightClick = (e, message) => {
     e.preventDefault(); // Prevent the default context menu
-    setSelectedMessage(message); // Set the message to be acted upon
-    console.log(message)
+    console.log("Right-clicked message:", message); // Test Log
+    setSelectedMessage(message); 
     setContextMenu({
       visible: true,
       x: e.pageX,
       y: e.pageY,
     });
-  };
-
-  const fetchMessages = async () => {
-    try {
-      const response = await apiClient.post(
-        GET_ALL_MESSAGES_ROUTE,
-        { id: selectedChatData._id },
-        { withCredentials: true }
-      );
-
-      if (response.data.messages) {
-          const decryptedMessages = response.data.messages.map((msg) => ({
-              ...msg,
-              content: msg.messageType === 'text'
-                  ? decryptMessage(msg.content) 
-                  : msg.content,              
-          }));
-          setSelectedChatMessages(decryptedMessages);
-      }
-    } catch (error) {
-      console.error("Error fetching messages:", error);
-    }
   };
   
 
@@ -243,7 +223,7 @@ const MessageContainer = () => {
   };
 
   const renderDMMessages = (message) => (
-    <div className={`${message.sender === selectedChatData._id ? "text-left" : "text-right"}`} onContextMenu={(e) => handleRightClick(e, message)} >
+    <div className={`${message.sender === selectedChatData._id ? "text-left" : "text-right"}`} >
       {message.messageType === "text" && (
           <div className={`${message.sender !== selectedChatData._id ? "bg-[#8417ff]/5 text-[#8417ff] border-[#8417ff]/50" : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20 "} border inline-block p-4 rounded my-1 max-w-[50%] break-words cursor-pointer`}>{message.content}</div>
         )}
@@ -278,7 +258,7 @@ const MessageContainer = () => {
 
   const renderChannelMessages = (message) => {
     return (
-      <div className={`mt-5 ${message.sender._id !== userInfo.id ? "text-left" : "text-right"}`} onContextMenu={(e) => handleRightClick(e, message)} >
+      <div className={`mt-5 ${message.sender._id !== userInfo.id ? "text-left" : "text-right"}`} >
         {message.messageType === "text" && (
           <div className={`${message.sender._id === userInfo.id ? "bg-[#8417ff]/5 text-[#8417ff] border-[#8417ff]/50" : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20 "} border inline-block p-4 rounded my-1 max-w-[50%] break-words cursor-pointer`}>{message.content}
           </div>

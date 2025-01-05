@@ -15,10 +15,9 @@ export const deleteMessage = async (req, res) => {
 
     // If the message has an attached file, delete it from Cloudinary
     if (message.fileUrl) {
-      const publicId = message.fileUrl.split("/").pop().split(".")[0]; // Extract public ID
-      await cloudinary.uploader.destroy(publicId);
+        const publicId = `chat-app/files/${message.fileUrl.split("/").pop().split(".")[0]}`;
+        await cloudinary.uploader.destroy(publicId);
     }
-
     // Delete the message from the database
     await Message.deleteOne({ _id: messageId });
 
@@ -61,6 +60,15 @@ export const uploadFile = async (req, res) => {
             return res.status(400).send("No file uploaded.");
         }
 
+        const allowedMimeTypes = [
+            "image/jpeg", "image/png", "image/gif", "image/webp",
+            "application/pdf", "video/mp4", "application/zip"
+        ];
+          
+        if (!allowedMimeTypes.includes(req.file.mimetype)) {
+        return res.status(400).send("Invalid file type.");
+        }
+
         const result = await cloudinary.uploader.upload(req.file.path, {
             folder: "chat-app/files",
             resource_type: "auto",
@@ -82,7 +90,7 @@ export const deleteFile = async (req, res) => {
             return res.status(400).send("File URL is required.");
         }
 
-        const publicId = fileUrl.split("/").pop().split(".")[0]; // Extract Cloudinary public_id
+        const publicId = `chat-app/files/${fileUrl.split("/").pop().split(".")[0]}`; // Extract Cloudinary public_id
         await cloudinary.uploader.destroy(`chat-app/files/${publicId}`);
 
         res.status(200).send("File deleted successfully.");

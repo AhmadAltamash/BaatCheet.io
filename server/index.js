@@ -53,7 +53,10 @@ app.get("/proxy-file", async (req, res) => {
         method: "GET",
         responseType: "stream",
       });
-      res.setHeader("Content-Type", response.headers["content-type"]);
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${decodeURIComponent(url.split("/").pop())}"`
+      );      
       response.data.pipe(res);
     } catch (error) {
       console.error("File fetch error:", error);
