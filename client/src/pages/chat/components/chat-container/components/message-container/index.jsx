@@ -46,13 +46,21 @@ const MessageContainer = () => {
   
   const handleDeleteMessage = async () => {
     try {
-      await apiClient.delete(`${DELETE_MESSAGE_ROUTE}/${selectedMessage._id}`);
+      console.log("Deleting message with ID:", selectedMessage._id);
+  
+      // Make DELETE request with the message ID in the URL
+      const response = await apiClient.delete(
+        `${DELETE_MESSAGE_ROUTE}/${selectedMessage._id}`
+      );
+  
+      console.log(response.data); // Log response for debugging
       setContextMenu({ visible: false, x: 0, y: 0 }); // Close context menu
-      fetchMessages(); // Refresh message list
+      fetchMessages(); // Refresh messages
     } catch (error) {
-      console.error("Failed to delete message:", error);
+      console.error("Failed to delete message:", error.response?.data || error);
     }
   };
+  
   
   const handleDeleteFile = async () => {
     try {

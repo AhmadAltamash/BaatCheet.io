@@ -1,32 +1,32 @@
 import Message from "../models/MessagesModel.js";
 import { v2 as cloudinary } from "cloudinary"; // To interact with Cloudinary for deleting files
 
-// Controller to delete a message
 export const deleteMessage = async (req, res) => {
-  try {
-    const { messageId } = req.body;  // You should send the message ID to be deleted
-
-    // Find the message in the database
-    const message = await Message.findById(messageId);
-
-    if (!message) {
-      return res.status(404).send({ error: "Message not found" });
-    }
-
-    // If the message has an attached file, delete it from Cloudinary
-    if (message.fileUrl) {
+    try {
+      const { id } = req.params; // Get ID from URL params
+  
+      // Find the message by ID
+      const message = await Message.findById(id);
+      if (!message) {
+        return res.status(404).send({ error: "Message not found" });
+      }
+  
+      // Delete attached file in Cloudinary if it exists
+      if (message.fileUrl) {
         const publicId = `chat-app/files/${message.fileUrl.split("/").pop().split(".")[0]}`;
         await cloudinary.uploader.destroy(publicId);
+      }
+  
+      // Delete the message from the database
+      await Message.findByIdAndDelete(id);
+  
+      res.status(200).send({ message: "Message deleted successfully" });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ error: "Failed to delete message" });
     }
-    // Delete the message from the database
-    await Message.deleteOne({ _id: messageId });
-
-    res.status(200).send({ message: "Message deleted successfully" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send({ error: "Failed to delete message" });
-  }
-};
+  };
+  
 
 
 // Get messages
