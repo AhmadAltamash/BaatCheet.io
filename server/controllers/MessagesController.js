@@ -94,3 +94,28 @@ export const uploadFile = async (req, res) => {
     }
 };
 
+// Delete file
+export const deleteFile = async (req, res) => {
+    try {
+        const { fileUrl } = req.body;
+
+        if (!fileUrl) {
+            return res.status(400).send("File URL is required.");
+        }
+
+        // Extract Cloudinary public ID from the URL
+        const publicId = `chat-app/files/${fileUrl.split("/").pop().split(".")[0]}`;
+
+        // Log file information for debugging
+        console.log("Deleting file with publicId:", publicId);
+
+        // Delete the file from Cloudinary
+        await cloudinary.uploader.destroy(publicId);
+
+        res.status(200).send("File deleted successfully.");
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error deleting file", error: error.message });
+    }
+};
+
