@@ -61,7 +61,17 @@ const MessageContainer = () => {
     }
   };
   
-  
+  const handleRightClick = (e, message) => {
+    e.preventDefault(); // Prevent the default context menu
+    console.log("Right-clicked message:", message); // Test Log
+    setSelectedMessage(message); 
+    setContextMenu({
+      visible: true,
+      x: e.pageX,
+      y: e.pageY,
+    });
+  };
+
   const handleDeleteFile = async () => {
     try {
       await apiClient.delete(`${DELETE_FILE_ROUTE}`, {
@@ -73,17 +83,28 @@ const MessageContainer = () => {
       console.error("Failed to delete file:", error);
     }
   };
-  
-  const handleRightClick = (e, message) => {
-    e.preventDefault(); // Prevent the default context menu
-    console.log("Right-clicked message:", message); // Test Log
-    setSelectedMessage(message); 
-    setContextMenu({
-      visible: true,
-      x: e.pageX,
-      y: e.pageY,
-    });
+
+  const fetchMessages = async () => {
+    try {
+      const response = await apiClient.post(
+        GET_ALL_MESSAGES_ROUTE,
+        { id: selectedChatData._id },
+        { withCredentials: true }
+      );
+      if (response.data.messages) {
+        const decryptedMessages = response.data.messages.map((msg) => ({
+            ...msg,
+            content: msg.messageType === 'text'
+                ? decryptMessage(msg.content) 
+                : msg.content,              
+        }));
+        setSelectedChatMessages(decryptedMessages);
+      }
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    }
   };
+  
   
 
   const scrollRef = useRef();
