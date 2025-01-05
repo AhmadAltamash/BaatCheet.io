@@ -54,7 +54,7 @@ export const getMessages = async (req, res) => {
 };
 
 // Upload file
-const uploadFile = async (req, res) => {
+export const uploadFile = async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).send("No file uploaded.");
@@ -91,8 +91,6 @@ const uploadFile = async (req, res) => {
         res.status(500).json({ message: "Could not upload file", error: error.message });
     }
 };
-
-
 
 // Delete file
 export const deleteFile = async (req, res) => {
