@@ -20,6 +20,7 @@ export const GET_ALL_CONTACTS_ROUTES = `${CONTACTS_ROUTES}/get-all-contacts`;
 export const MESSAGES_ROUTES = 'api/messages';
 export const GET_ALL_MESSAGES_ROUTE = `${MESSAGES_ROUTES}/get-messages`;
 export const UPLOAD_FILE_ROUTE = `${MESSAGES_ROUTES}/upload-file`;
+export const DOWNLOAD_FILE_ROUTE = `/api/proxy-file`;
 export const DELETE_FILE_ROUTE = `${MESSAGES_ROUTES}/delete-file`;
 export const DELETE_MESSAGE_ROUTE = `${MESSAGES_ROUTES}/delete-message`;
 

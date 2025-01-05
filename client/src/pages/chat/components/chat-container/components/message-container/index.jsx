@@ -1,6 +1,6 @@
 import { apiClient } from '@/lib/api-client';
 import { useAppStore } from '@/store'
-import { DELETE_FILE_ROUTE, DELETE_MESSAGE_ROUTE, GET_ALL_MESSAGES_ROUTE, GET_CHANNEL_MESSAGES_ROUTES, HOST } from '@/utils/constants';
+import { DELETE_FILE_ROUTE, DELETE_MESSAGE_ROUTE, DOWNLOAD_FILE_ROUTE, GET_ALL_MESSAGES_ROUTE, GET_CHANNEL_MESSAGES_ROUTES, HOST } from '@/utils/constants';
 import moment from 'moment';
 import React, { useEffect, useRef, useState } from 'react'
 import { MdFolderZip } from 'react-icons/md'
@@ -212,7 +212,7 @@ const MessageContainer = () => {
     setIsDownloading(true);
     try {
         const response = await axios.get(
-            `/api/proxy-file?url=${encodeURIComponent(url)}`, 
+            `${DOWNLOAD_FILE_ROUTE}?url=${encodeURIComponent(url)}`, 
             {
                 responseType: "blob",
                 onDownloadProgress: (progressEvent) => {
