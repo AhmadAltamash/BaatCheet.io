@@ -120,9 +120,10 @@ export const uploadFile = async (req, res) => {
         }
 
         // Ensure the sender and recipient are present (optional for testing)
-        const { sender, recipient } = req.body;
+        const user1 = req.userId;
+        const user2 = req.body.id;
 
-        if (!sender || !recipient) {
+        if (!user1 || !user2) {
             return res.status(400).json({ message: "Sender and recipient are required." });
         }
 
@@ -144,8 +145,8 @@ export const uploadFile = async (req, res) => {
 
         // Save the message with file URL to the database
         const newMessage = new Message({
-            sender,
-            recipient,
+            sender: user1,
+            recipient: user2,
             messageType: "file",
             fileUrl: uploadedResponse.secure_url, // Use Cloudinary URL
             timestamp: Date.now(),
