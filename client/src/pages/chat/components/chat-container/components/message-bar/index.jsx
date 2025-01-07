@@ -116,6 +116,9 @@ const MessageBar = () => {
               channelId: selectedChatData._id,
             })
           }
+        } else {
+          setIsUploading(false);
+          alert("Failed to upload file");
         }
       }
       console.log(file)

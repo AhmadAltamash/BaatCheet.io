@@ -54,7 +54,7 @@ export const getMessages = async (req, res) => {
 };
 
 // Upload file and save in database
-const uploadFile = async (req, res) => {
+export const uploadFile = async (req, res) => {
     try {
         console.log("Incoming Request: POST /api/messages/upload-file");
 
