@@ -207,6 +207,50 @@ const MessageContainer = () => {
     return imageRegex.test(filePath);
   };
 
+  // const downloadFile = async (url) => {
+  //   console.log(url);
+  //   setIsDownloading(true);
+  //   try {
+  //       const response = await axios.get(
+  //           `${DOWNLOAD_FILE_ROUTE}?url=${encodeURIComponent(url)}`, 
+  //           {
+  //               responseType: "blob",
+  //               onDownloadProgress: (progressEvent) => {
+  //                   const { loaded, total } = progressEvent;
+  //                   const percentCompleted = Math.round((loaded * 100) / total);
+  //                   setFileDownloadProgress(percentCompleted);
+  //               },
+  //           }
+  //       );
+
+  //       console.log("Response received:", response);
+
+  //       // Ensure the response is a blob and check content type
+  //       const contentType = response.headers["content-type"];
+  //       if (!contentType.startsWith("image") && !contentType.startsWith("application")) {
+  //           console.error("Invalid file type received:", contentType);
+  //           alert("Invalid file type received.");
+  //           return;
+  //       }
+
+  //       // Create a blob URL for the downloaded file
+  //       const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
+  //       const link = document.createElement("a");
+  //       link.href = blobUrl;
+  //       link.setAttribute("download", url.split("/").pop()); // Extract file name
+  //       document.body.appendChild(link);
+  //       link.click();
+  //       link.remove();
+  //       window.URL.revokeObjectURL(blobUrl); // Clean up blob URL
+  //   } catch (error) {
+  //       console.error("Error downloading file:", error);
+  //       alert("Error downloading file.");
+  //   } finally {
+  //       setIsDownloading(false);
+  //       setFileDownloadProgress(0);
+  //   }
+  // };
+
   const downloadFile = async (url) => {
     console.log(url);
     setIsDownloading(true);
@@ -214,7 +258,7 @@ const MessageContainer = () => {
         const response = await axios.get(
             `${DOWNLOAD_FILE_ROUTE}?url=${encodeURIComponent(url)}`, 
             {
-                responseType: "blob",
+                responseType: "blob", // Correct response type
                 onDownloadProgress: (progressEvent) => {
                     const { loaded, total } = progressEvent;
                     const percentCompleted = Math.round((loaded * 100) / total);
@@ -223,25 +267,22 @@ const MessageContainer = () => {
             }
         );
 
-        console.log("Response received:", response);
-
-        // Ensure the response is a blob and check content type
         const contentType = response.headers["content-type"];
-        if (!contentType.startsWith("image") && !contentType.startsWith("application")) {
-            console.error("Invalid file type received:", contentType);
+        const validTypes = ["image", "application", "video"]; // Expanded MIME types
+
+        if (!validTypes.some(type => contentType.startsWith(type))) {
             alert("Invalid file type received.");
             return;
         }
 
-        // Create a blob URL for the downloaded file
         const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement("a");
         link.href = blobUrl;
-        link.setAttribute("download", url.split("/").pop()); // Extract file name
+        link.setAttribute("download", url.split("/").pop());
         document.body.appendChild(link);
         link.click();
         link.remove();
-        window.URL.revokeObjectURL(blobUrl); // Clean up blob URL
+        window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
         console.error("Error downloading file:", error);
         alert("Error downloading file.");

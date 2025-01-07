@@ -83,50 +83,104 @@ const MessageBar = () => {
     }
   }
 
+  // const handleAttachmentChange = async (e) => {
+  //   try {
+  //     const file = e.target.files[0];
+  //     if(file) {
+  //       const formData = new FormData();
+  //       formData.append("file", file);
+  //       setIsUploading(true);
+  //       const response = await apiClient.post(UPLOAD_FILE_ROUTE, formData, {withCredentials: true,
+  //         onUploadProgress: (data) => {
+  //           setFileUploadProgress(Math.round((100 * data.loaded) / data.total))
+  //         },
+  //       });
+  //       console.log(response)
+
+  //       if(response.status === 200 && response.data) {
+  //         setIsUploading(false);
+  //         if(selectedChatType === "contact"){
+  //           socket.emit("sendMessage", {
+  //             sender: userInfo.id,
+  //             content: undefined,
+  //             recipient: selectedChatData._id,
+  //             messageType: "file",
+  //             fileUrl: response.data.filePath,
+  //           })
+  //         } else if(selectedChatType === "channel") {
+  //           socket.emit("send-channel-message", {
+  //             sender: userInfo.id,
+  //             content: undefined,
+  //             messageType: "file",
+  //             fileUrl: response.data.filePath,
+  //             channelId: selectedChatData._id,
+  //           })
+  //         }
+  //       } else if(response.status === 201) {
+  //         setIsUploading(false);
+  //         console.log("Uploaded To Cloudinary")
+  //       }
+  //     }
+  //     console.log(file)
+  //   } catch (error) {
+  //     setIsUploading(false)
+  //     console.log({error})
+  //   }
+  // }
   const handleAttachmentChange = async (e) => {
     try {
-      const file = e.target.files[0];
-      if(file) {
-        const formData = new FormData();
-        formData.append("file", file);
-        setIsUploading(true);
-        const response = await apiClient.post(UPLOAD_FILE_ROUTE, formData, {withCredentials: true,
-          onUploadProgress: (data) => {
-            setFileUploadProgress(Math.round((100 * data.loaded) / data.total))
-          },
-        });
-        console.log(response)
+        const file = e.target.files[0];
+        if (file) {
+            // Validate MIME types
+            const allowedFileTypes = [
+                "image/jpeg", "image/png", "image/gif", "application/pdf",
+                "video/mp4", "application/zip", 
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "text/plain"
+            ];
+            if (!allowedFileTypes.includes(file.type)) {
+                alert("Unsupported file type!");
+                return;
+            }
 
-        if(response.status === 200 && response.data) {
-          setIsUploading(false);
-          if(selectedChatType === "contact"){
-            socket.emit("sendMessage", {
-              sender: userInfo.id,
-              content: undefined,
-              recipient: selectedChatData._id,
-              messageType: "file",
-              fileUrl: response.data.filePath,
-            })
-          } else if(selectedChatType === "channel") {
-            socket.emit("send-channel-message", {
-              sender: userInfo.id,
-              content: undefined,
-              messageType: "file",
-              fileUrl: response.data.filePath,
-              channelId: selectedChatData._id,
-            })
-          }
-        } else if(response.status === 201) {
-          setIsUploading(false);
-          console.log("Uploaded To Cloudinary")
+            const formData = new FormData();
+            formData.append("file", file);
+            setIsUploading(true);
+            const response = await apiClient.post(UPLOAD_FILE_ROUTE, formData, {withCredentials: true,
+                onUploadProgress: (data) => {
+                    setFileUploadProgress(Math.round((100 * data.loaded) / data.total))
+                },
+            });
+            console.log(response);
+
+            if(response.status === 200 && response.data) {
+                setIsUploading(false);
+                if(selectedChatType === "contact"){
+                    socket.emit("sendMessage", {
+                        sender: userInfo.id,
+                        content: undefined,
+                        recipient: selectedChatData._id,
+                        messageType: "file",
+                        fileUrl: response.data.filePath,
+                    });
+                } else if(selectedChatType === "channel") {
+                    socket.emit("send-channel-message", {
+                        sender: userInfo.id,
+                        content: undefined,
+                        messageType: "file",
+                        fileUrl: response.data.filePath,
+                        channelId: selectedChatData._id,
+                    });
+                }
+            } 
         }
-      }
-      console.log(file)
     } catch (error) {
-      setIsUploading(false)
-      console.log({error})
+        setIsUploading(false);
+        console.log({error});
     }
-  }
+};
+
 
   return (
     <div className='h-[10vh] bg-[#1c1d25] flex justify-center items-center px-8 mb-6 gap-6'>

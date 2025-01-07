@@ -9,8 +9,11 @@ import { v2 as cloudinary } from "cloudinary";
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-        folder: "chat-app/files",
-        allowed_formats: ["jpg", "png", "jpeg", "gif", "pdf", "mp4", "zip", "webp"],
+        folder: "chat-app/uploads",
+        allowed_formats: [
+            "jpg", "png", "jpeg", "gif", "pdf", "mp4", "zip",
+            "webp", "docx", "xlsx", "txt", "csv", "pptx"
+        ], // Expanded allowed formats
     },
 });
 
