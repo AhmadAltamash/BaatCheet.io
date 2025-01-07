@@ -225,7 +225,7 @@ const MessageContainer = () => {
 
         console.log("Response received:", response);
 
-        //Ensure the response is a blob and check content type
+        // Ensure the response is a blob and check content type
         const contentType = response.headers["content-type"];
         if (!contentType.startsWith("image") && !contentType.startsWith("application")) {
             console.error("Invalid file type received:", contentType);
