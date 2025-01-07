@@ -56,34 +56,58 @@ export const getMessages = async (req, res) => {
 // Upload file and save in database
 export const uploadFile = async (req, res) => {
     try {
-        // Check if file exists
+        console.log("Incoming Request: POST /api/messages/upload-file");
+
+        // Check if the file exists
         if (!req.file) {
-            return res.status(400).send("No file uploaded.");
+            return res.status(400).json({ message: "No file uploaded." });
         }
 
-        // Upload file to Cloudinary
-        const result = await cloudinary.uploader.upload(req.file.path, {
+        // Ensure the sender and recipient are present (optional for testing)
+        const { sender, recipient } = req.body;
+
+        if (!sender || !recipient) {
+            return res.status(400).json({ message: "Sender and recipient are required." });
+        }
+
+        // Upload the file to Cloudinary
+        const uploadedResponse = await cloudinary.uploader.upload(req.file.path, {
             folder: "chat-app/files",
-            resource_type: "auto", // Allows handling non-image files
+            resource_type: "auto", // Handles images, PDFs, etc.
+            use_filename: true,
+            unique_filename: false,
+            overwrite: false,
         });
 
-        // Save file details in the database
-        const newMessage = new Message({
-            sender: req.userId, // Replace with actual sender ID from request
-            recipient: req.body.recipientId, // Replace with recipient ID
+        console.log("Cloudinary Upload Response:", uploadedResponse);
+
+        if (!uploadedResponse.secure_url) {
+            return res.status(500).json({ message: "Failed to upload file to Cloudinary." });
+        }
+
+        // Save the message with file URL to the database
+        const newMessage = new MessageModel({
+            sender,
+            recipient,
             messageType: "file",
-            fileUrl: result.secure_url,
+            fileUrl: uploadedResponse.secure_url, // Use Cloudinary URL
+            timestamp: Date.now(),
         });
 
         await newMessage.save();
+        console.log("Message saved:", newMessage);
 
-        // Respond with success and saved file data
-        res.status(200).json({ message: "File uploaded and saved successfully", file: newMessage });
+        // Send response
+        res.status(201).json(newMessage);
     } catch (error) {
-        console.error("Upload Error:", error.message);
-        res.status(500).json({ message: "Could not upload file", error: error.message });
+        console.error("Error uploading file:", error);
+        res.status(500).json({
+            message: "Could not upload file",
+            error: error.message,
+        });
     }
 };
+
 
 // Delete file
 export const deleteFile = async (req, res) => {
