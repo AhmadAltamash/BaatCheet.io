@@ -225,13 +225,13 @@ const MessageContainer = () => {
 
         console.log("Response received:", response);
 
-        // Ensure the response is a blob and check content type
-        // const contentType = response.headers["content-type"];
-        // if (!contentType.startsWith("image") && !contentType.startsWith("application")) {
-        //     console.error("Invalid file type received:", contentType);
-        //     alert("Invalid file type received.");
-        //     return;
-        // }
+        //Ensure the response is a blob and check content type
+        const contentType = response.headers["content-type"];
+        if (!contentType.startsWith("image") && !contentType.startsWith("application")) {
+            console.error("Invalid file type received:", contentType);
+            alert("Invalid file type received.");
+            return;
+        }
 
         // Create a blob URL for the downloaded file
         const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
