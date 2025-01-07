@@ -1,5 +1,5 @@
 import Message from "../models/MessagesModel.js";
-import { v2 as cloudinary } from "cloudinary"; // To interact with Cloudinary for deleting files
+import { v2 as cloudinary } from "cloudinary";
 
 export const deleteMessage = async (req, res) => {
     try {
@@ -53,38 +53,37 @@ export const getMessages = async (req, res) => {
     }
 };
 
-// Upload file
+// Upload file and save in database
 export const uploadFile = async (req, res) => {
     try {
+        // Check if file exists
         if (!req.file) {
             return res.status(400).send("No file uploaded.");
         }
 
-        const allowedMimeTypes = [
-            "image/jpeg", "image/png", "image/gif", "image/webp",
-            "application/pdf", "video/mp4", "application/zip"
-        ];
-          
-        if (!allowedMimeTypes.includes(req.file.mimetype)) {
-            return res.status(400).send("Invalid file type.");
-        }
-
-        // Determine the resource type based on the MIME type
-        const resourceType = req.file.mimetype.startsWith("image") ? "image" : "auto";
-
         // Upload file to Cloudinary
         const result = await cloudinary.uploader.upload(req.file.path, {
             folder: "chat-app/files",
-            resource_type: resourceType,  // Use "image" for image files, "auto" for others
+            resource_type: "auto", // Allows handling non-image files
         });
 
-        res.status(200).json({ filePath: result.secure_url });
+        // Save file details in the database
+        const newMessage = new Message({
+            sender: req.userId, // Replace with actual sender ID from request
+            recipient: req.body.recipientId, // Replace with recipient ID
+            messageType: "file",
+            fileUrl: result.secure_url,
+        });
+
+        await newMessage.save();
+
+        // Respond with success and saved file data
+        res.status(200).json({ message: "File uploaded and saved successfully", file: newMessage });
     } catch (error) {
-        console.error(error);
+        console.error("Upload Error:", error.message);
         res.status(500).json({ message: "Could not upload file", error: error.message });
     }
 };
-
 
 // Delete file
 export const deleteFile = async (req, res) => {
