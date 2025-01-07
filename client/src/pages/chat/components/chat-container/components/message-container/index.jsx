@@ -255,17 +255,17 @@ const MessageContainer = () => {
     console.log(url);
     setIsDownloading(true);
     try {
-        const response = await axios.get(
-            `${DOWNLOAD_FILE_ROUTE}?url=${encodeURIComponent(url)}`, 
-            {
-                responseType: "blob", // Correct response type
-                onDownloadProgress: (progressEvent) => {
-                    const { loaded, total } = progressEvent;
-                    const percentCompleted = Math.round((loaded * 100) / total);
-                    setFileDownloadProgress(percentCompleted);
-                },
-            }
-        );
+      const response = await axios.get(
+        `${DOWNLOAD_FILE_ROUTE}?url=${encodeURIComponent(url)}`,
+          {
+              responseType: "blob", // Handles all binary files
+              onDownloadProgress: (progressEvent) => {
+                  const { loaded, total } = progressEvent;
+                  const percentCompleted = Math.round((loaded * 100) / total);
+                  setFileDownloadProgress(percentCompleted);
+              },
+          }
+      );
 
         const contentType = response.headers["content-type"];
         const validTypes = ["image", "application", "video"]; // Expanded MIME types

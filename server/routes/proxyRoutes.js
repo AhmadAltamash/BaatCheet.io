@@ -89,7 +89,13 @@ proxyRoutes.get("/proxy-file", async (req, res) => {
 
         console.log("Received response from the file URL");
 
+        // Allow any content type
         const contentType = response.headers["content-type"];
+        if (!contentType) {
+            console.error("Missing content type:", contentType);
+            return res.status(400).json({ message: "Invalid file type." });
+        }
+        console.log("File Content-Type:", contentType);
         const contentLength = response.headers["content-length"];
 
         const fileName = decodeURIComponent(fileUrl.split("/").pop());

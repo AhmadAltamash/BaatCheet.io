@@ -54,18 +54,36 @@ export const uploadFile = async (req, res) => {
     try {
         console.log("Incoming Request: POST /api/messages/upload-file");
 
-        // Check if the file exists
+        // Ensure a file exists
         if (!req.file) {
+            console.error("No file uploaded.");
             return res.status(400).json({ message: "No file uploaded." });
         }
 
-        // Use the URL directly from multer
-        res.status(200).json({ filePath: req.file.path });
+        console.log("Uploaded File Details:", req.file); // Log file details for debugging
+
+        // Force Cloudinary to handle any file type explicitly
+        const uploadedResponse = await cloudinary.uploader.upload(req.file.path, {
+            folder: "chat-app/files",
+            resource_type: "raw", // Use 'raw' for non-image files
+            use_filename: true,
+            unique_filename: false,
+            overwrite: false,
+        });
+
+        console.log("Cloudinary Upload Response:", uploadedResponse);
+
+        if (!uploadedResponse.secure_url) {
+            return res.status(500).json({ message: "Failed to upload file to Cloudinary." });
+        }
+
+        res.status(200).json({ filePath: uploadedResponse.secure_url });
     } catch (error) {
-        console.error(error);
+        console.error("Error during file upload:", error.message);
         res.status(500).json({ message: "Could not upload file", error: error.message });
     }
 };
+
 
 // Delete file
 export const deleteFile = async (req, res) => {
