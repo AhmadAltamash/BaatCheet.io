@@ -116,9 +116,9 @@ const MessageBar = () => {
               channelId: selectedChatData._id,
             })
           }
-        } else {
+        } else if(response.status === 201) {
           setIsUploading(false);
-          alert("Failed to upload file");
+          console.log("Uploaded To Cloudinary")
         }
       }
       console.log(file)
