@@ -54,53 +54,40 @@ export const getMessages = async (req, res) => {
 };
 
 // Upload file and save in database
-export const uploadFile = async (req, res) => {
+const uploadFile = async (req, res) => {
     try {
         console.log("Incoming Request: POST /api/messages/upload-file");
 
         // Check if the file exists
         if (!req.file) {
+            console.log("No file uploaded.");
             return res.status(400).json({ message: "No file uploaded." });
-        }
-
-        // Ensure the sender and recipient are present (optional for testing)
-        const { sender, recipient } = req.body;
-
-        if (!sender || !recipient) {
-            return res.status(400).json({ message: "Sender and recipient are required." });
         }
 
         // Upload the file to Cloudinary
         const uploadedResponse = await cloudinary.uploader.upload(req.file.path, {
             folder: "chat-app/files",
-            resource_type: "auto", // Handles images, PDFs, etc.
-            use_filename: true,
-            unique_filename: false,
+            resource_type: "auto", // Handles all file types
+            use_filename: true,    // Use the original file name
+            unique_filename: false, // Prevents renaming
             overwrite: false,
         });
 
         console.log("Cloudinary Upload Response:", uploadedResponse);
 
+        // Check if Cloudinary returned a valid URL
         if (!uploadedResponse.secure_url) {
+            console.log("Cloudinary upload failed.");
             return res.status(500).json({ message: "Failed to upload file to Cloudinary." });
         }
 
-        // Save the message with file URL to the database
-        const newMessage = new MessageModel({
-            sender,
-            recipient,
-            messageType: "file",
-            fileUrl: uploadedResponse.secure_url, // Use Cloudinary URL
-            timestamp: Date.now(),
+        // Respond with the uploaded file URL
+        res.status(201).json({
+            message: "File uploaded successfully.",
+            fileUrl: uploadedResponse.secure_url, // Send the Cloudinary URL
         });
-
-        await newMessage.save();
-        console.log("Message saved:", newMessage);
-
-        // Send response
-        res.status(201).json(newMessage);
     } catch (error) {
-        console.error("Error uploading file:", error);
+        console.error("Error uploading file:", error.message);
         res.status(500).json({
             message: "Could not upload file",
             error: error.message,
