@@ -49,10 +49,10 @@ proxyRoutes.get("/proxy-file", async (req, res) => {
         // Pipe the file data to the client
         response.data.pipe(res);
     } catch (error) {
-        console.error("Error fetching file:", error.message); // Log error for debugging
+        console.error("Error fetching file:", {error}); // Log error for debugging
         res.status(500).json({
             message: "Error fetching file",
-            error: error.message,
+            error: error,
         });
     }
 });
