@@ -120,14 +120,43 @@ export const uploadFile = async (req, res) => {
         }
 
         // Ensure the sender and recipient are present (optional for testing)
-        const user1 = req.userId;
-        const user2 = req.body.id;
+        // const user1 = req.userId;
+        // const user2 = req.body.id;
 
-        if (!user1 || !user2) {
-            return res.status(400).json({ message: "Sender and recipient are required." });
-        }
+        // if (!user1 || !user2) {
+        //     return res.status(400).json({ message: "Sender and recipient are required." });
+        // }
 
         // Upload the file to Cloudinary
+        // const uploadedResponse = await cloudinary.uploader.upload(req.file.path, {
+        //     folder: "chat-app/files",
+        //     resource_type: "auto", // Handles images, PDFs, etc.
+        //     use_filename: true,
+        //     unique_filename: false,
+        //     overwrite: false,
+        // });
+
+        // console.log("Cloudinary Upload Response:", uploadedResponse);
+
+        // if (!uploadedResponse.secure_url) {
+        //     return res.status(500).json({ message: "Failed to upload file to Cloudinary." });
+        // }
+        // res.status(201).send("Uploaded to Cloudinary")
+
+        // Save the message with file URL to the database
+        // const newMessage = new Message({
+        //     sender: user1,
+        //     recipient: user2,
+        //     messageType: "file",
+        //     fileUrl: uploadedResponse.secure_url, // Use Cloudinary URL
+        //     timestamp: Date.now(),
+        // });
+
+        // await newMessage.save();
+        // console.log("Message saved:", newMessage);
+
+        // // Send response
+        // res.status(200).json({newMessage});
         const uploadedResponse = await cloudinary.uploader.upload(req.file.path, {
             folder: "chat-app/files",
             resource_type: "auto", // Handles images, PDFs, etc.
@@ -141,22 +170,8 @@ export const uploadFile = async (req, res) => {
         if (!uploadedResponse.secure_url) {
             return res.status(500).json({ message: "Failed to upload file to Cloudinary." });
         }
-        res.status(201).send("Uploaded to Cloudinary")
 
-        // Save the message with file URL to the database
-        const newMessage = new Message({
-            sender: user1,
-            recipient: user2,
-            messageType: "file",
-            fileUrl: uploadedResponse.secure_url, // Use Cloudinary URL
-            timestamp: Date.now(),
-        });
-
-        await newMessage.save();
-        console.log("Message saved:", newMessage);
-
-        // Send response
-        res.status(200).json({newMessage});
+        res.status(200).json({ filePath: uploadedResponse.secure_url });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Could not upload file", error: error.message });
