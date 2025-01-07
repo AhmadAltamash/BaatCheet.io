@@ -9,7 +9,6 @@ import setupSocket from './socket.js'
 import messagesRoute from './routes/MessagesRoute.js'
 import channelRoutes from './routes/ChannelRoutes.js'
 import uploadRoutes from './routes/UploadRoutes.js'
-import axios from 'axios';
 import proxyRoutes from './routes/proxyRoutes.js'
 
 dotenv.config();
@@ -31,6 +30,11 @@ app.use(cors({
 
 app.use(cookieParser());
 app.use(express.json());
+
+app.use((req, res, next) => {
+  console.log(`Incoming Request: ${req.method} ${req.url}`);
+  next();
+});
 
 app.use('/api', proxyRoutes)
 app.use('/api/auth', authRoutes);
