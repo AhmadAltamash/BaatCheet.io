@@ -210,7 +210,7 @@ const MessageContainer = () => {
   const downloadFile = async (id) => {  // Use 'id' instead of 'url'
     setIsDownloading(true);
     try {
-        const response = await axios.get(
+        const response = await axios.post(
             `${DOWNLOAD_FILE_ROUTE}/${id}`, // Dynamic route
             {
                 responseType: "blob", // Handle binary files

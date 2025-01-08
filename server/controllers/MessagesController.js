@@ -107,6 +107,7 @@ export const uploadFile = async (req, res) => {
             recipient: req.body.recipientId,
             fileUrl: uploadedResponse.secure_url,
             messageType: "file",
+            fileType: req.file.mimetype, // Save type
             timestamp: Date.now(),
         });
 

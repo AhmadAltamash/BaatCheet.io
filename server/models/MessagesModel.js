@@ -36,7 +36,13 @@ const messageSchema = new mongoose.Schema({
             },
             message: "Invalid URL format for file!",
         },
-    },    
+    },
+    fileType: {
+        type: String,
+        required: function () {
+            return this.messageType === "file";
+        }
+    },
     timestamp: {
         type: Date,
         default: Date.now,
