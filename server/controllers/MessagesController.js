@@ -50,40 +50,74 @@ export const getMessages = async (req, res) => {
 };
 
 // Upload file
+// export const uploadFile = async (req, res) => {
+//     try {
+//         console.log("Incoming Request: POST /api/messages/upload-file");
+
+//         // Ensure a file exists
+//         if (!req.file) {
+//             console.error("No file uploaded.");
+//             return res.status(400).json({ message: "No file uploaded." });
+//         }
+
+//         console.log("Uploaded File Details:", req.file); // Log file details for debugging
+
+//         // Force Cloudinary to handle any file type explicitly
+//         const uploadedResponse = await cloudinary.uploader.upload(req.file.path, {
+//             folder: "chat-app/files",
+//             resource_type: "raw", // Use 'raw' for non-image files
+//             use_filename: true,
+//             unique_filename: false,
+//             overwrite: false,
+//         });
+
+//         console.log("Cloudinary Upload Response:", uploadedResponse);
+
+//         if (!uploadedResponse.secure_url) {
+//             return res.status(500).json({ message: "Failed to upload file to Cloudinary." });
+//         }
+
+//         res.status(200).json({ filePath: uploadedResponse.secure_url });
+//     } catch (error) {
+//         console.error("Error during file upload:", error.message);
+//         res.status(500).json({ message: "Could not upload file", error: error.message });
+//     }
+// };
 export const uploadFile = async (req, res) => {
     try {
-        console.log("Incoming Request: POST /api/messages/upload-file");
-
-        // Ensure a file exists
         if (!req.file) {
-            console.error("No file uploaded.");
             return res.status(400).json({ message: "No file uploaded." });
         }
 
-        console.log("Uploaded File Details:", req.file); // Log file details for debugging
-
-        // Force Cloudinary to handle any file type explicitly
         const uploadedResponse = await cloudinary.uploader.upload(req.file.path, {
             folder: "chat-app/files",
-            resource_type: "raw", // Use 'raw' for non-image files
+            resource_type: "auto",
             use_filename: true,
             unique_filename: false,
             overwrite: false,
         });
 
-        console.log("Cloudinary Upload Response:", uploadedResponse);
-
         if (!uploadedResponse.secure_url) {
             return res.status(500).json({ message: "Failed to upload file to Cloudinary." });
         }
 
+        // Save file metadata in MongoDB
+        const newMessage = new Message({
+            sender: req.userId,
+            recipient: req.body.recipientId,
+            fileUrl: uploadedResponse.secure_url,
+            fileType: req.file.mimetype, // Save type
+            timestamp: Date.now(),
+        });
+
+        await newMessage.save(); // Save in MongoDB
+
         res.status(200).json({ filePath: uploadedResponse.secure_url });
     } catch (error) {
-        console.error("Error during file upload:", error.message);
+        console.error(error);
         res.status(500).json({ message: "Could not upload file", error: error.message });
     }
 };
-
 
 // Delete file
 export const deleteFile = async (req, res) => {
@@ -107,5 +141,28 @@ export const deleteFile = async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error deleting file", error: error.message });
+    }
+};
+
+export const downloadFile = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const message = await Message.findById(id);
+
+        if (!message || !message.fileUrl) {
+            return res.status(404).send("File not found.");
+        }
+
+        // Set headers for download
+        res.set({
+            "Content-Type": message.fileType,
+            "Content-Disposition": `attachment; filename="${message.fileUrl.split('/').pop()}"`,
+        });
+
+        // Redirect to Cloudinary file URL
+        res.redirect(message.fileUrl); // Handles downloading directly
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Error downloading file.");
     }
 };
