@@ -32,7 +32,7 @@ const messageSchema = new mongoose.Schema({
         },
         validate: {
             validator: function (v) {
-                return this.messageType !== "file" || /^https?:\/\/.*\.(jpg|jpeg|png|gif|bmp|tiff|webp|svg|ico|heic|heif|pdf|mp4|zip|mp3)$/.test(v);
+                return this.messageType !== "file" || /^https?:\/\/.*$/.test(v);
             },
             message: "Invalid URL format for file!",
         },
