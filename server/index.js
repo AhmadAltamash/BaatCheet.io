@@ -20,7 +20,7 @@ const databaseURL = process.env.DATABASE_URL || 'mongodb://localhost:27017/';
 
 // CORS Configuration
 app.use(cors({
-    origin: "https://baat-cheet-io.vercel.app",
+    origin: "https://baat-cheet-a35uw0r28-altamash-ahmads-projects.vercel.app",
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
