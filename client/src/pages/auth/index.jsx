@@ -82,38 +82,38 @@ const Auth = () => {
   }
 
   return (
-    <div className="h-[100vh] w-[100%] flex items-center justify-center">
-      <div className="h-[80vh] bg-white border-2 border-white text-opacity-90 shadow-2xl w-[80vw] md:w-[90vw] lg:w-[70vw] xl:[60vw] rounded-3xl grid xl:grid-cols-2">
+    <div className="h-[100vh] w-[100%] flex items-center justify-center bg-[#1c1d25]">
+      <div className="h-[80vh] bg-[#262731] border-2 border-[#1c1d25] text-opacity-90 shadow-2xl w-[80vw] md:w-[90vw] lg:w-[70vw] xl:[60vw] rounded-3xl grid xl:grid-cols-2">
         <div className="flex items-center justify-center flex-col">
           <div className="flex items-center justify-center">
-            <h1 className="text-5xl font-bold md:text-6xl ">Welcome</h1>
+            <h1 className="text-4xl font-bold md:text-6xl text-white">Welcome</h1>
             <img
               src={Victory}
               alt='victory'
-              className='h-[100px]'
+              className='h-[80px] md:h-[100px]'
             />
           </div>
-          <p className='capitalize font-medium text-center'>Fill in the details to get Started with the best Chat application</p>
+          <p className='capitalize font-medium text-center text-[1.1rem] md:text-xl p-2 text-white'>Fill in the details to get Started with the best Chat application</p>
           <div className='flex items-center justify-center w-full'>
           <Tabs className='w-3/4' defaultValue='login'>
 
             <TabsList className='bg-transparent rounded-none w-full'>
-              <TabsTrigger value='login' className='data-[state=active]:bg-transparent text-black text-opacity-90 border-b-2 rounded-none w-full data-[state=active]:text-black data-[state=active]:font-semibold data-[state=active]:border-b-purple-500 p-3 transition-all duration-300' >Login</TabsTrigger>
-              <TabsTrigger value='signup' className='data-[state=active]:bg-transparent text-black text-opacity-90 border-b-2 rounded-none w-full data-[state=active]:text-black data-[state=active]:font-semibold data-[state=active]:border-b-purple-500 p-3 transition-all duration-300'>Signup</TabsTrigger>
+              <TabsTrigger value='login' className='data-[state=active]:bg-transparent text-white text-opacity-90 border-b-2 rounded-none w-full data-[state=active]:text-white data-[state=active]:font-semibold data-[state=active]:border-b-purple-500 p-3 transition-all duration-300' >Login</TabsTrigger>
+              <TabsTrigger value='signup' className='data-[state=active]:bg-transparent text-white text-opacity-90 border-b-2 rounded-none w-full data-[state=active]:text-white data-[state=active]:font-semibold data-[state=active]:border-b-purple-500 p-3 transition-all duration-300'>Signup</TabsTrigger>
             </TabsList>
 
             <TabsContent value='login' className='flex flex-col gap-5 mt-4'>
               <Input
                 placeholder='Email'
                 type='email'
-                className='rounded-full p-6 focus-visible:outline-purple-400 focus-visible:border-none'
+                className='rounded-full p-6 focus-visible:outline-purple-400 focus-visible:border-none focus-visible:outline-2 bg-gray-600/40 outline-0 border-none text-white placeholder:text-white'
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
               <Input
                 placeholder='Password'
                 type='password'
-                className='rounded-full p-6 focus-visible:outline-purple-400 focus-visible:border-none'
+                className='rounded-full p-6 focus-visible:outline-purple-400 focus-visible:border-none focus-visible:outline-2 bg-gray-600/40 outline-0 border-none text-white placeholder:text-white'
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -124,21 +124,21 @@ const Auth = () => {
             <Input
                 placeholder='Email'
                 type='email'
-                className='rounded-full p-6 focus-visible:outline-purple-400 focus-visible:border-none'
+                className='rounded-full p-6 focus-visible:outline-purple-400 focus-visible:border-none focus-visible:outline-2 bg-gray-600/40 outline-0 border-none text-white placeholder:text-white'
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
               <Input
                 placeholder='Password'
                 type='password'
-                className='rounded-full p-6 focus-visible:outline-purple-400 focus-visible:border-none'
+                className='rounded-full p-6 focus-visible:outline-purple-400 focus-visible:border-none focus-visible:outline-2 bg-gray-600/40 outline-0 border-none text-white placeholder:text-white'
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
               <Input
                 placeholder='Confirm Password'
                 type='password'
-                className='rounded-full p-6 focus-visible:outline-purple-400 focus-visible:border-none'
+                className='rounded-full p-6 focus-visible:outline-purple-400 focus-visible:border-none focus-visible:outline-2 bg-gray-600/40 outline-0 border-none text-white placeholder:text-white'
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />

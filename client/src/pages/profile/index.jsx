@@ -140,7 +140,7 @@ const Profile = () => {
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
         >
-          <Avatar className="w-32 h-32 md:w-48 md:h-48 rounded-full overflow-hidden">
+          <Avatar className="w-24 h-24 md:w-48 md:h-48 rounded-full overflow-hidden">
             {image ? (
               <AvatarImage
                 src={image}

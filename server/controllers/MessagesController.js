@@ -67,7 +67,7 @@ export const uploadFile = async (req, res) => {
         // Force Cloudinary to handle any file type explicitly
         const uploadedResponse = await cloudinary.uploader.upload(req.file.path, {
             folder: "chat-app/files",
-            resource_type: "raw", // Use 'raw' for non-image files
+            resource_type: "auto", // Use 'raw' for non-image files
             use_filename: true,
             unique_filename: false,
             overwrite: false,
@@ -82,8 +82,11 @@ export const uploadFile = async (req, res) => {
         const user1 = req.userId;
         const user2 = req.body.id;
 
+        if (!user1 || !user2) {
+            return res.status(400).send("Both users are required.");
+        }
+
         console.log("Saving to MongoDB:", {
-            user2,
             sender: user1,
             recipient: user2,
             fileUrl: uploadedResponse.secure_url,

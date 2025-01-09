@@ -102,6 +102,7 @@ const MessageBar = () => {
 
             const formData = new FormData();
             formData.append("file", file);
+            formData.append("id", selectedChatData._id); // Append recipient ID
             setIsUploading(true);
             const response = await apiClient.post(UPLOAD_FILE_ROUTE, formData, {
               withCredentials: true,
@@ -142,9 +143,9 @@ const MessageBar = () => {
 
 
   return (
-    <div className='h-[10vh] bg-[#1c1d25] flex justify-center items-center px-8 mb-6 gap-6'>
-      <div className="flex-1 flex bg-[#2a2b33] rounded-md items-center gap-5 pr-5">
-        <input type='text' className='flex-1 p-5 bg-transparent focus:border-none focus:outline-none'
+    <div className='h-[10vh] bg-[#1c1d25] flex justify-center items-center px-20 sm:px-8 mb-6 gap-2 sm:gap-6'>
+      <div className="flex-1 flex bg-[#2a2b33] rounded-md items-center gap-2 sm:gap-5 pr-2 sm:pr-5 w-[300px] h-[75%]">
+        <input type='text' className='flex-1 p-2 sm:p-5 bg-transparent focus:border-none focus:outline-none w-[75%]'
         placeholder='Type a message...' value={message} onChange={(e) => setMessage(e.target.value)}/>
         <button className='text-neutral-500 focus:border-none focus:outline-none focus:text-white duration-300 transition-all' onClick={handleAttachmentClick} >
           <GrAttachment className='text-2xl'/>
@@ -164,7 +165,7 @@ const MessageBar = () => {
           </div>
         </div>
       </div>
-      <button className='bg-[#8417ff] focus:border-none focus:outline-none focus:text-white duration-300 transition-all rounded-md flex items-center justify-center p-[1.20rem] hover:bg-[#741bda] focus:bg-[#741bda]' onClick={handleSendMessage}>
+      <button className='bg-[#8417ff] focus:border-none focus:outline-none focus:text-white duration-300 transition-all rounded-md flex items-center justify-center p-[1.20rem] hover:bg-[#741bda] focus:bg-[#741bda] h-[50px] w-[50px] sm:h-[55px] sm:w-[55px]' onClick={handleSendMessage}>
           <IoSend className='text-2xl'/>
         </button>
     </div>

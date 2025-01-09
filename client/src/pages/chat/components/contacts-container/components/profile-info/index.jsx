@@ -1,10 +1,9 @@
-import Loader from '@/components/Loader';
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { apiClient } from '@/lib/api-client';
 import { getColor } from '@/lib/utils';
 import { useAppStore } from '@/store';
-import { HOST, LOGOUT_ROUTE } from '@/utils/constants';
+import { LOGOUT_ROUTE } from '@/utils/constants';
 import { useEffect, useState } from 'react';
 import { FiEdit2 } from 'react-icons/fi';
 import { IoPowerSharp } from 'react-icons/io5';
