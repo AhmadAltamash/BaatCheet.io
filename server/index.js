@@ -19,7 +19,7 @@ const port = process.env.PORT || 3001;
 const databaseURL = process.env.DATABASE_URL || 'mongodb://localhost:27017/';
 
 app.use(cors({
-    origin: ["https://baat-cheet-io.vercel.app/"],
+    origin: process.env.ORIGIN || ["http://baat-cheet-io.vercel.app/"],
     credentials: true, 
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
 }));
