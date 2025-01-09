@@ -1,5 +1,5 @@
 export const HOST = import.meta.env.VITE_SERVER_URL;
-const BASE_URL = "https://baatcheet-io-gbta.onrender.com/api";
+const BASE_URL = "https://baatcheet-io-5ao2.onrender.com/api";
 
 // Auth Routes
 export const AUTH_ROUTES = 'api/auth';
