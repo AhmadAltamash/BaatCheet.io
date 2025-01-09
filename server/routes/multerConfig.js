@@ -20,8 +20,8 @@ const storage = new CloudinaryStorage({
         allowed_formats: [
             "jpg", "png", "jpeg", "gif", "pdf", "mp4", "zip",
             "webp", "docx", "xlsx", "txt", "csv", "pptx"
-        ], // Unified allowed formats
-        resource_type: "auto", // Ensure it works for all file types
+        ], 
+        resource_type: "auto", 
     },
 });
 

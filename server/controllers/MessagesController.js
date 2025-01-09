@@ -78,9 +78,10 @@ export const uploadFile = async (req, res) => {
         }
 
         const user1 = req.userId;
-        const user2 = req.body.id;
+        const user2 = req.body;
 
         console.log("Saving to MongoDB:", {
+            user2,
             sender: user1,
             recipient: user2,
             fileUrl: uploadedResponse.secure_url,

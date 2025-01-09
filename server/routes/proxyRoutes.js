@@ -12,14 +12,12 @@ proxyRoutes.get("/proxy-file", async (req, res) => {
             return res.status(400).json({ message: "File URL is required." });
         }
 
-        // Allow only Cloudinary URLs
         if (!fileUrl.startsWith("https://res.cloudinary.com/")) {
             return res.status(400).json({ message: "Invalid file URL." });
         }
 
         console.log("Fetching file from URL...");
 
-        // Fetch file using arraybuffer
         const response = await axios({
             url: fileUrl,
             method: "GET",
@@ -28,7 +26,6 @@ proxyRoutes.get("/proxy-file", async (req, res) => {
 
         console.log("Received response from the file URL");
 
-        // Allow any content type
         const contentType = response.headers["content-type"];
         if (!contentType) {
             console.error("Missing content type:", contentType);
