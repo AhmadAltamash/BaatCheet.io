@@ -34,6 +34,8 @@ export const getMessages = async (req, res) => {
         if (!user1 || !user2) {
             return res.status(400).send("Both users are required.");
         }
+        console.log("Sender:", user1);
+        console.log("Recipient:", user2);
 
         const messages = await Message.find({
             $or: [
