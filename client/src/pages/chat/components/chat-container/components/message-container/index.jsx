@@ -207,11 +207,11 @@ const MessageContainer = () => {
     return imageRegex.test(filePath);
   };
 
-  const downloadFile = async (id) => {  // Use 'id' instead of 'url'
+  const downloadFile = async (id) => {
     setIsDownloading(true);
     try {
-        const response = await axios.post(
-            `${DOWNLOAD_FILE_ROUTE}/${id}`, // Dynamic route
+        const response = await axios.get(
+            `${DOWNLOAD_FILE_ROUTE}/${id}`, // Dynamic route for GET
             {
                 responseType: "blob", // Handle binary files
                 onDownloadProgress: (progressEvent) => {
@@ -225,19 +225,21 @@ const MessageContainer = () => {
         const contentType = response.headers["content-type"];
         const validTypes = ["image", "application", "audio", "video", "text"]; // Expanded MIME types
 
-        if (!validTypes.some(type => contentType.startsWith(type))) {
+        if (!validTypes.some((type) => contentType.startsWith(type))) {
             alert("Invalid file type received.");
             return;
         }
 
-        // Extract filename
-        const fileName = response.headers['content-disposition']
-            ?.split('filename=')[1] || id;
+        // Extract filename from Content-Disposition or use the ID as fallback
+        const fileName =
+            response.headers["content-disposition"]
+                ?.split("filename=")[1]
+                ?.replace(/"/g, "") || `download-${id}`;
 
         const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement("a");
         link.href = blobUrl;
-        link.setAttribute("download", fileName); // Use proper filename
+        link.setAttribute("download", fileName);
         document.body.appendChild(link);
         link.click();
         link.remove();
@@ -250,6 +252,7 @@ const MessageContainer = () => {
         setFileDownloadProgress(0);
     }
 };
+
 
 //   const downloadFile = async (url) => {
 //     console.log(url);

@@ -88,30 +88,26 @@ export const uploadFile = async (req, res) => {
 export const downloadFile = async (req, res) => {
     try {
         const { id } = req.params;
-
-        // Fetch the message from MongoDB
         const message = await Message.findById(id);
 
         if (!message || !message.fileUrl) {
-            return res.status(404).json({ message: "File not found." });
+            return res.status(404).send("File not found.");
         }
 
-        // Set headers for downloading the file
+        // Set headers for downloading
         res.set({
-            "Content-Type": message.fileType, // e.g., application/pdf, image/png
-            "Content-Disposition": `attachment; filename="${message.fileUrl.split('/').pop()}"`, // Extract file name from URL
+            "Content-Type": message.fileType,
+            "Content-Disposition": `attachment; filename="${message.fileUrl.split('/').pop()}"`,
         });
 
-        // Redirect to Cloudinary file URL (handles direct downloads)
+        // Redirect to Cloudinary file URL to serve the file
         res.redirect(message.fileUrl);
     } catch (error) {
         console.error("Error downloading file:", error);
-        res.status(500).json({
-            message: "Error downloading file.",
-            error: error.message,
-        });
+        res.status(500).send("Error downloading file.");
     }
 };
+
 
 // Delete file
 export const deleteFile = async (req, res) => {
