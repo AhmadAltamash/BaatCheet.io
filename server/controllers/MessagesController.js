@@ -80,7 +80,7 @@ export const uploadFile = async (req, res) => {
         }
 
         const user1 = req.userId;
-        const user2 = req;
+        const user2 = req.body.id;
 
         console.log("Saving to MongoDB:", {
             user2,
