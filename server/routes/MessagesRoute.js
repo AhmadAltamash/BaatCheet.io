@@ -7,7 +7,6 @@ const messagesRoute = Router();
 
 messagesRoute.post("/get-messages", verifyToken, getMessages);
 messagesRoute.post("/upload-file", verifyToken, upload.single("file"), uploadFile);
-messagesRoute.get("/download-file/:id", verifyToken, downloadFile);
 messagesRoute.delete("/delete-file/:id", verifyToken, deleteFile);
 messagesRoute.delete("/delete-message/:id", verifyToken, deleteMessage);
 

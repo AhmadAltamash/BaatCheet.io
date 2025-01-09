@@ -29,13 +29,7 @@ const messageSchema = new mongoose.Schema({
         type: String,
         required: function () {
             return this.messageType === "file";
-        },
-        validate: {
-            validator: function (v) {
-                return this.messageType !== "file" || /^https?:\/\/.*$/.test(v);
-            },
-            message: "Invalid URL format for file!",
-        },
+        }
     },
     timestamp: {
         type: Date,

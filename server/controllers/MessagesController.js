@@ -77,6 +77,16 @@ export const uploadFile = async (req, res) => {
             return res.status(500).json({ message: "Failed to upload file to Cloudinary." });
         }
 
+        const user1 = req.userId;
+        const user2 = req.body.id;
+
+        console.log("Saving to MongoDB:", {
+            sender: user1,
+            recipient: user2,
+            fileUrl: uploadedResponse.secure_url,
+            fileType: req.file.mimetype,
+        });
+        
         res.status(200).json({ filePath: uploadedResponse.secure_url });
     } catch (error) {
         console.error("Error during file upload:", error.message);

@@ -1,5 +1,5 @@
 export const HOST = import.meta.env.VITE_SERVER_URL;
-const BASE_URL = "https://baatcheet-io-103r.onrender.com/api";
+const BASE_URL = "https://baatcheet-io-76lz.onrender.com/api";
 
 // Auth Routes
 export const AUTH_ROUTES = 'api/auth';
@@ -21,7 +21,7 @@ export const GET_ALL_CONTACTS_ROUTES = `${CONTACTS_ROUTES}/get-all-contacts`;
 export const MESSAGES_ROUTES = `${BASE_URL}/messages`;
 export const GET_ALL_MESSAGES_ROUTE = `${MESSAGES_ROUTES}/get-messages`;
 export const UPLOAD_FILE_ROUTE = `${MESSAGES_ROUTES}/upload-file`;
-export const DOWNLOAD_FILE_ROUTE = `${BASE_URL}/download-file`;
+export const DOWNLOAD_FILE_ROUTE = `${BASE_URL}/proxy-file`;
 export const DELETE_FILE_ROUTE = `${MESSAGES_ROUTES}/delete-file`;
 export const DELETE_MESSAGE_ROUTE = `${MESSAGES_ROUTES}/delete-message`;
 
