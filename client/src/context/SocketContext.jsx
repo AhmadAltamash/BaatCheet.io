@@ -42,11 +42,10 @@ export const SocketProvider = ({ children }) => {
         });
 
         socket.current.on("connect", () => {
-            console.log("Connected to socket server");
+            console.log();
         });
 
         const handleRecieveMessage = (message) => {
-            console.log(message)
             const { selectedChatData, selectedChatType, addMessage, addContactsInDMContacts } = useAppStore.getState();
             if (
                 selectedChatType !== undefined &&
@@ -54,7 +53,6 @@ export const SocketProvider = ({ children }) => {
             ) {
                 const decryptedContent = decryptMessage(message.content);
                 addMessage({ ...message, content: decryptedContent });
-                console.log(decryptedContent);
             }
             addContactsInDMContacts(message)
         };

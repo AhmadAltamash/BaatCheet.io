@@ -53,7 +53,6 @@ const MessageBar = () => {
     if (selectedChatType === "contact") {
       const encryptedMessage = encryptMessage(message);
 
-      console.log("Sending Encrypted Message:", encryptedMessage);
 
       socket.emit("sendMessage", {
         sender: userInfo.id,
@@ -64,7 +63,6 @@ const MessageBar = () => {
       });
     } else if(selectedChatType === "channel"){
       const encryptedMessage = encryptMessage(message);
-      console.log("Sending Encrypted Message:", encryptedMessage);
 
         socket.emit("send-channel-message", {
           sender: userInfo.id,
@@ -102,7 +100,7 @@ const MessageBar = () => {
 
             const formData = new FormData();
             formData.append("file", file);
-            formData.append("id", selectedChatData._id); // Append recipient ID
+            formData.append("id", selectedChatData._id);
             setIsUploading(true);
             const response = await apiClient.post(UPLOAD_FILE_ROUTE, formData, {
               withCredentials: true,
@@ -111,8 +109,6 @@ const MessageBar = () => {
                   setFileUploadProgress(Math.round((100 * data.loaded) / data.total));
               },
             });
-
-            console.log("Upload Response:", response);
 
             if(response.status === 200 && response.data) {
                 setIsUploading(false);
@@ -137,7 +133,6 @@ const MessageBar = () => {
         }
     } catch (error) {
         setIsUploading(false);
-        console.log({error});
     }
 };
 

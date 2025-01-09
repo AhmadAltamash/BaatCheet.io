@@ -4,7 +4,6 @@ import { Router } from "express";
 const proxyRoutes = Router();
 
 proxyRoutes.get("/proxy-file", async (req, res) => {
-    console.log("Received a request for proxy-file route");
     const fileUrl = req.query.url;
 
     try {
@@ -16,22 +15,17 @@ proxyRoutes.get("/proxy-file", async (req, res) => {
             return res.status(400).json({ message: "Invalid file URL." });
         }
 
-        console.log("Fetching file from URL...");
-
         const response = await axios({
             url: fileUrl,
             method: "GET",
             responseType: "arraybuffer",
         });
 
-        console.log("Received response from the file URL");
-
         const contentType = response.headers["content-type"];
         if (!contentType) {
             console.error("Missing content type:", contentType);
             return res.status(400).json({ message: "Invalid file type." });
         }
-        console.log("File Content-Type:", contentType);
         const contentLength = response.headers["content-length"];
 
         const fileName = decodeURIComponent(fileUrl.split("/").pop());

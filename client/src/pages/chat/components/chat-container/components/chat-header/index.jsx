@@ -1,7 +1,6 @@
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { getColor } from '@/lib/utils';
 import { useAppStore } from '@/store'
-import { HOST } from '@/utils/constants';
 import { RiCloseFill } from 'react-icons/ri'
 
 const ChatHeader = () => {

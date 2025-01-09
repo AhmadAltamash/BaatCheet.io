@@ -76,8 +76,6 @@ const Auth = () => {
         setUserInfo(response.data.user)
         navigate('/profile');
       }
-
-      console.log({ response })
     }
   }
 

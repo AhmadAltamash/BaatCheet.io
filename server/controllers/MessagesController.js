@@ -34,9 +34,6 @@ export const getMessages = async (req, res) => {
         if (!user1 || !user2) {
             return res.status(400).send("Both users are required.");
         }
-        console.log("Sender:", user1);
-        console.log("Recipient:", user2);
-
         const messages = await Message.find({
             $or: [
                 { sender: user1, recipient: user2 },
@@ -54,26 +51,19 @@ export const getMessages = async (req, res) => {
 //Upload file
 export const uploadFile = async (req, res) => {
     try {
-        console.log("Incoming Request: POST /api/messages/upload-file");
-
         // Ensure a file exists
         if (!req.file) {
             console.error("No file uploaded.");
             return res.status(400).json({ message: "No file uploaded." });
         }
 
-        console.log("Uploaded File Details:", req.file); // Log file details for debugging
-
-        // Force Cloudinary to handle any file type explicitly
         const uploadedResponse = await cloudinary.uploader.upload(req.file.path, {
             folder: "chat-app/files",
-            resource_type: "auto", // Use 'raw' for non-image files
+            resource_type: "auto",
             use_filename: true,
             unique_filename: false,
             overwrite: false,
         });
-
-        console.log("Cloudinary Upload Response:", uploadedResponse);
 
         if (!uploadedResponse.secure_url) {
             return res.status(500).json({ message: "Failed to upload file to Cloudinary." });
@@ -86,13 +76,6 @@ export const uploadFile = async (req, res) => {
             return res.status(400).send("Both users are required.");
         }
 
-        console.log("Saving to MongoDB:", {
-            sender: user1,
-            recipient: user2,
-            fileUrl: uploadedResponse.secure_url,
-            fileType: req.file.mimetype,
-        });
-        
         res.status(200).json({ filePath: uploadedResponse.secure_url });
     } catch (error) {
         console.error("Error during file upload:", error.message);
@@ -136,9 +119,6 @@ export const deleteFile = async (req, res) => {
 
         // Extract Cloudinary public ID from the URL
         const publicId = `chat-app/files/${fileUrl.split("/").pop().split(".")[0]}`;
-
-        // Log file information for debugging
-        console.log("Deleting file with publicId:", publicId);
 
         // Delete the file from Cloudinary
         await cloudinary.uploader.destroy(publicId);

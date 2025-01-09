@@ -46,24 +46,20 @@ const MessageContainer = () => {
   
   const handleDeleteMessage = async () => {
     try {
-      console.log("Deleting message with ID:", selectedMessage._id);
-  
-      // Make DELETE request with the message ID in the URL
+
       const response = await apiClient.delete(
         `${DELETE_MESSAGE_ROUTE}/${selectedMessage._id}`
       );
-  
-      console.log(response.data); // Log response for debugging
-      setContextMenu({ visible: false, x: 0, y: 0 }); // Close context menu
-      fetchMessages(); // Refresh messages
+
+      setContextMenu({ visible: false, x: 0, y: 0 });
+      fetchMessages();
     } catch (error) {
       console.error("Failed to delete message:", error.response?.data || error);
     }
   };
   
   const handleRightClick = (e, message) => {
-    e.preventDefault(); // Prevent the default context menu
-    console.log("Right-clicked message:", message); // Test Log
+    e.preventDefault();
     setSelectedMessage(message); 
     setContextMenu({
       visible: true,
@@ -207,55 +203,7 @@ const MessageContainer = () => {
     return imageRegex.test(filePath);
   };
 
-//   const downloadFile = async (id) => {
-//     setIsDownloading(true);
-//     try {
-//         const response = await axios.get(
-//             `${DOWNLOAD_FILE_ROUTE}/${id}`, // Dynamic route for GET
-//             {
-//                 responseType: "blob", // Handle binary files
-//                 onDownloadProgress: (progressEvent) => {
-//                     const { loaded, total } = progressEvent;
-//                     const percentCompleted = Math.round((loaded * 100) / total);
-//                     setFileDownloadProgress(percentCompleted);
-//                 },
-//             }
-//         );
-
-//         const contentType = response.headers["content-type"];
-//         const validTypes = ["image", "application", "audio", "video", "text"]; // Expanded MIME types
-
-//         if (!validTypes.some((type) => contentType.startsWith(type))) {
-//             alert("Invalid file type received.");
-//             return;
-//         }
-
-//         // Extract filename from Content-Disposition or use the ID as fallback
-//         const fileName =
-//             response.headers["content-disposition"]
-//                 ?.split("filename=")[1]
-//                 ?.replace(/"/g, "") || `download-${id}`;
-
-//         const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
-//         const link = document.createElement("a");
-//         link.href = blobUrl;
-//         link.setAttribute("download", fileName);
-//         document.body.appendChild(link);
-//         link.click();
-//         link.remove();
-//         window.URL.revokeObjectURL(blobUrl);
-//     } catch (error) {
-//         console.error("Error downloading file:", error);
-//         alert("Error downloading file.");
-//     } finally {
-//         setIsDownloading(false);
-//         setFileDownloadProgress(0);
-//     }
-// };
-
-
   const downloadFile = async (url) => {
-    console.log(url);
     setIsDownloading(true);
     try {
       const response = await axios.get(
@@ -295,22 +243,6 @@ const MessageContainer = () => {
     }
 };
 
-
-    // const downloadFile = async (url) => {
-    //   console.log(url)
-    //   const response = await apiClient.get(url , {
-    //     responseType: "blob",
-    //   });
-    //   const urlBlob = window.URL.createObjectURL(new Blob([response.data]))
-    //   const link = document.createElement("a");
-    //   link.href = urlBlob;
-    //   link.setAttribute("download", url.split("/").pop());
-    //   document.body.appendChild(link);
-    //   link.click();
-    //   link.remove();
-    //   window.URL.revokeObjectURL(urlBlob);
-    // }
-
   const renderMessages = () => {
     let lastDate = null;
     return selectedChatMessages.map((message, index) => {
@@ -335,7 +267,7 @@ const MessageContainer = () => {
         )}
         {
           message.messageType === "file" && (
-            <div className={`${message.sender !== selectedChatData._id ? "bg-[#8417ff]/5 text-[#8417ff] border-[#8417ff]/50" : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20 "} border inline-block p-4 rounded my-1 max-w-[50%] break-words`}>{checkIfImage(message.fileUrl) ? (
+            <div className={`${message.sender !== selectedChatData._id ? "bg-[#8417ff]/5 text-[#8417ff] border-[#8417ff]/50" : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20 "} relative border inline-block p-4 rounded my-1 max-w-[50%] break-words`}>{checkIfImage(message.fileUrl) ? (
               <div className='cursor-pointer' onClick={() => {
                 setShowImage(true);
                 setImageUrl(message.fileUrl);
@@ -348,7 +280,7 @@ const MessageContainer = () => {
                 />
               </div>
             ) : (
-              <div className='flex items-center justify-center gap-4'>
+              <div className='flex items-center justify-center gap-4 relative'>
                 <span className='text-white/80 text-3xl bg-black/20 rounded-full p-3'>
                   <MdFolderZip/>
                 </span>
