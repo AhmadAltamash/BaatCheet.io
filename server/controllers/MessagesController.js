@@ -49,96 +49,40 @@ export const getMessages = async (req, res) => {
     }
 };
 
-// Upload file
-// export const uploadFile = async (req, res) => {
-//     try {
-//         console.log("Incoming Request: POST /api/messages/upload-file");
-
-//         // Ensure a file exists
-//         if (!req.file) {
-//             console.error("No file uploaded.");
-//             return res.status(400).json({ message: "No file uploaded." });
-//         }
-
-//         console.log("Uploaded File Details:", req.file); // Log file details for debugging
-
-//         // Force Cloudinary to handle any file type explicitly
-//         const uploadedResponse = await cloudinary.uploader.upload(req.file.path, {
-//             folder: "chat-app/files",
-//             resource_type: "raw", // Use 'raw' for non-image files
-//             use_filename: true,
-//             unique_filename: false,
-//             overwrite: false,
-//         });
-
-//         console.log("Cloudinary Upload Response:", uploadedResponse);
-
-//         if (!uploadedResponse.secure_url) {
-//             return res.status(500).json({ message: "Failed to upload file to Cloudinary." });
-//         }
-
-//         res.status(200).json({ filePath: uploadedResponse.secure_url });
-//     } catch (error) {
-//         console.error("Error during file upload:", error.message);
-//         res.status(500).json({ message: "Could not upload file", error: error.message });
-//     }
-// };
+//Upload file
 export const uploadFile = async (req, res) => {
     try {
-        // Ensure a file is provided
+        console.log("Incoming Request: POST /api/messages/upload-file");
+
+        // Ensure a file exists
         if (!req.file) {
+            console.error("No file uploaded.");
             return res.status(400).json({ message: "No file uploaded." });
         }
 
-        const { mimetype } = req.file;
-        const fileType = mimetype.split("/")[0];
+        console.log("Uploaded File Details:", req.file); // Log file details for debugging
 
-        // Upload to Cloudinary
+        // Force Cloudinary to handle any file type explicitly
         const uploadedResponse = await cloudinary.uploader.upload(req.file.path, {
             folder: "chat-app/files",
-            resource_type: "auto", // Automatically detects file type (e.g., image, video, document)
+            resource_type: "raw", // Use 'raw' for non-image files
             use_filename: true,
             unique_filename: false,
             overwrite: false,
         });
 
+        console.log("Cloudinary Upload Response:", uploadedResponse);
+
         if (!uploadedResponse.secure_url) {
             return res.status(500).json({ message: "Failed to upload file to Cloudinary." });
         }
 
-        const user1 = req.userId;
-        const user2 = req.body.id;
-
-        if (!user1 || !user2) {
-            return res.status(400).send("Both users are required.");
-        }
-
-        // Save metadata to MongoDB
-        const newMessage = new Message({
-            sender: user1,
-            recipient: user2,
-            fileUrl: uploadedResponse.secure_url,
-            messageType: "file",
-            fileType, // e.g., application/pdf, image/png
-            timestamp: Date.now(),
-        });
-
-        await newMessage.save();
-
-        // Return file URL
-        res.status(200).json({
-            message: "File uploaded successfully.",
-            filePath: uploadedResponse.secure_url,
-        });
+        res.status(200).json({ filePath: uploadedResponse.secure_url });
     } catch (error) {
-        console.error("Error uploading file:", error);
-        res.status(500).json({
-            message: "Could not upload file.",
-            error: error.message,
-        });
+        console.error("Error during file upload:", error.message);
+        res.status(500).json({ message: "Could not upload file", error: error.message });
     }
 };
-
 
 //Download File
 export const downloadFile = async (req, res) => {

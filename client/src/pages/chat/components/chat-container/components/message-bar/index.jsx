@@ -103,12 +103,15 @@ const MessageBar = () => {
             const formData = new FormData();
             formData.append("file", file);
             setIsUploading(true);
-            const response = await apiClient.post(UPLOAD_FILE_ROUTE, formData, {withCredentials: true,
-                onUploadProgress: (data) => {
-                    setFileUploadProgress(Math.round((100 * data.loaded) / data.total))
-                },
+            const response = await apiClient.post(UPLOAD_FILE_ROUTE, formData, {
+              withCredentials: true,
+              headers: { "Content-Type": "multipart/form-data" },
+              onUploadProgress: (data) => {
+                  setFileUploadProgress(Math.round((100 * data.loaded) / data.total));
+              },
             });
-            console.log(response);
+
+            console.log("Upload Response:", response);
 
             if(response.status === 200 && response.data) {
                 setIsUploading(false);
