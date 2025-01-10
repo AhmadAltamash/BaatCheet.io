@@ -152,7 +152,7 @@ const Profile = () => {
               />
             ) : (
               <div
-                className={`uppercase h-32 w-32 md:w-48 md:h-48 text-5xl border-[.5px] flex items-center justify-center rounded-full ${getColor(
+                className={`uppercase w-24 h-24 sm:w-48 sm:h-48 text-5xl border-[.5px] flex items-center justify-center rounded-full ${getColor(
                   selectedColor
                 )}`}
               >
