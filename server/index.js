@@ -10,21 +10,10 @@ import messagesRoute from './routes/MessagesRoute.js';
 import channelRoutes from './routes/ChannelRoutes.js';
 import uploadRoutes from './routes/UploadRoutes.js';
 import proxyRoutes from './routes/proxyRoutes.js';
-import path from 'path';
 
 dotenv.config();
 
 const app = express();
-
-
-// Serve React app
-const __dirname = path.resolve(); // Ensure correct __dirname setup
-app.use(express.static(path.join(__dirname, 'client/build')));
-
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
-});
-
 
 const port = process.env.PORT || 3001;
 const databaseURL = process.env.DATABASE_URL || 'mongodb://localhost:27017/';
