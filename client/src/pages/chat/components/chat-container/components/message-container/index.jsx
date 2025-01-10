@@ -31,14 +31,6 @@ const MessageContainer = () => {
           >
             Delete Message
           </li>
-          {selectedMessage?.messageType === "file" && (
-            <li
-              className="px-4 py-2 hover:bg-purple-800/40 cursor-pointer"
-              onClick={handleDeleteFile}
-            >
-              Delete File
-            </li>
-          )}
         </ul>
       </div>
     );
