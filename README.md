@@ -2,7 +2,7 @@
 
 **BAAT-CHEET** is a modern, secure, and feature-packed chat application built with the MERN stack and Socket.IO. It ensures end-to-end encryption for safe communication and supports various functionalities like file sharing, custom user experiences, and profile management.  
 
-![Baat-Cheet Preview]()  
+<img src="/client/public/banner preview.png"/>
 
 ---
 
