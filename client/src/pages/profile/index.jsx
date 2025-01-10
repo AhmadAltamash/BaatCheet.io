@@ -135,7 +135,7 @@ const Profile = () => {
         </div>
         <div className="grid grid-cols-2">
         <div
-          className="md:h-[80%] w-32 md:w-48 h-[55%] relative flex items-center justify-center"
+          className="md:h-[80%] w-24 sm:w-48 h-[55%] relative flex items-center justify-center"
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
         >
